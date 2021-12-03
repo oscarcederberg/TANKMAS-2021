@@ -2,13 +2,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Flash",
-			"type": "fdb",
-			"request": "launch",
-			"program": "${workspaceRoot}/export/flash/bin/Advent2020.swf",
-			"preLaunchTask": "debug: flash"
-		},
-		{
 			"name": "Chrome-debug",
 			"type": "chrome",
 			"request": "launch",
