@@ -15,9 +15,7 @@ class Dialogue{
     }
 }
 
-typedef DialogueContent = {
-    var messages:Map<String,DialogueMessage>;
-}
+typedef DialogueContent = Array<DialogueMessage>;
 
 typedef DialogueMessage = {
     var text:Array<String>;

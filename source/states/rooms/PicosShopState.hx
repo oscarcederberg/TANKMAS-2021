@@ -1,5 +1,7 @@
 package states.rooms;
 
+import props.Character;
+import js.html.CharacterData;
 import data.Skins;
 import props.Notif;
 import data.Manifest;
@@ -17,6 +19,7 @@ class PicosShopState extends RoomState
 {
     var changingRoom:OgmoDecal;
     var changingRoomNotif:Notif;
+    var pico:Character; 
     
     override function create()
     {
@@ -27,7 +30,8 @@ class PicosShopState extends RoomState
     {
         super.initEntities();
 
-        //addHoverTextTo(foreground.getByName("pico"), "TALK", () -> {});
+        pico = new Character("pico", foreground.getByName("pico"));
+        addHoverTextTo(foreground.getByName("pico"), "TALK", () -> pico.talk());
         
         changingRoom = foreground.getByName("changing-room-door");
         changingRoom.setBottomHeight(16);
