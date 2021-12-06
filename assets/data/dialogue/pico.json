@@ -2,13 +2,13 @@
     {
         "text": ["go pico, yeah yeah, go pico"],
         "weight": 1,
-        "fromDay": null,
-        "toDay": null
+        "fromDay": 1,
+        "toDay": 31
     },
     {
         "text": ["go pico", "yeah yeah", "go pico"],
         "weight": 1,
-        "fromDay": null,
-        "toDay": null
+        "fromDay": 1,
+        "toDay": 31
     }
 ]

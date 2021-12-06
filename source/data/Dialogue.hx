@@ -7,7 +7,7 @@ class Dialogue{
     public static var contentByCharacter:Map<String, DialogueContent>;
 
     public static function init(){
-        contentByCharacter = new Map<>();
+        contentByCharacter = new Map();
         for(character in characters){
             var content:DialogueContent = Json.parse('assets/data/dialogue/$character.json');
             contentByCharacter.set(character, content);

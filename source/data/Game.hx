@@ -74,6 +74,8 @@ class Game
         //     state = LuciaDay(Started);
         // else if (Save.noPresentsOpened())
         //     state = Intro(Started);
+
+        Dialogue.init();
     }
     
     static public function goToRoom(target:String):Void

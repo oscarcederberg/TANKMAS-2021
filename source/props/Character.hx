@@ -1,9 +1,10 @@
 package props;
 
+import ui.Prompt;
+import data.NGio;
 import flixel.FlxG;
 import states.OgmoState.OgmoDecal;
 import data.Dialogue;
-import data.Dialogue.DialogueContent;
 
 class Character{
     public var name:String;
@@ -18,16 +19,37 @@ class Character{
         this.dialogues = Dialogue.contentByCharacter.get(name);
         
         this.weightedArray = [for (message in this.dialogues) message.weight];
-        this.dialogueBuffer = new List<>();
+        this.dialogueBuffer = new List();
     }
 
-    public function talk(){
+    public function talk(){        
         if(dialogueBuffer.isEmpty()){
-            var messageIndex = FlxG.random.weightedPick(weightedArray);
-            var messages = dialogues[messageIndex].text;
-            for(message in messages){
-                dialogueBuffer.add(message);
+            populateDialogueBuffer();
+        }
+
+        var text = dialogueBuffer.pop();
+        Prompt.showOKInterrupt(text);
+    }
+
+    private function populateDialogueBuffer(){
+        var messageIndex:Int;
+        var myWeightedArray = this.weightedArray;
+        var currentDay = NGio.ngDate.getDate();
+        var messages:Array<String> = []; 
+        
+        while(true){
+            messageIndex = FlxG.random.weightedPick(myWeightedArray);
+            messages = dialogues[messageIndex].text;
+
+            if(currentDay >= dialogues[messageIndex].fromDay && currentDay <= dialogues[messageIndex].toDay){
+                break;
+            }else{
+                myWeightedArray[messageIndex] = 0;
             }
+        }
+
+        for(message in messages){
+            dialogueBuffer.add(message);
         }
     }
 }
