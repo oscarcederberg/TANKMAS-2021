@@ -1,6 +1,7 @@
 package data;
 
 import haxe.Json;
+import openfl.utils.Assets;
 
 class Dialogue{
     public static var characters:Array<String> = ["pico"];
@@ -9,7 +10,7 @@ class Dialogue{
     public static function init(){
         contentByCharacter = new Map();
         for(character in characters){
-            var content:DialogueContent = Json.parse('assets/data/dialogue/$character.json');
+            var content:DialogueContent = Json.parse(Assets.getText('assets/data/dialogue/$character.json'));
             contentByCharacter.set(character, content);
         }
     }
