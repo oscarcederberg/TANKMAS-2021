@@ -66,6 +66,7 @@
     , "smallphroge"      : { "proper": "smallphroge"       }
     , "tamag0"           : { "proper": "tamag0"            }
     , "phonometrologist" : { "proper": "Phonometrologist"  }
+    , "lobstermango" : { "proper": "Lobstermango"  }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -297,6 +298,24 @@
         , "day"    : 24
         , "medal"  : true
         }
+    ,   { "id"     : "smallphroge"
+        , "name"   : "Merry Crisis!"
+        , "authors": ["smallphroge"]
+        , "day"    : 25
+        , "medal"  : true
+        }
+    ,   { "id"     : "tamag0"
+        , "name"   : "LOOK OUT BELOW"
+        , "authors": ["tamag0"]
+        , "day"    : 26
+        , "medal"  : true
+    }
+    ,   { "id"     : "lobstermango"
+        , "name"   : "Untitled"
+        , "authors": ["lobstermango"]
+        , "day"    : 27
+        , "medal"  : true
+    }
     ,   { "id"     : "knosedoge"
         , "name"   : "CLOSE TO YOU"
         , "authors": ["knosedoge"]
@@ -354,18 +373,6 @@
         , "medal"  : false
         , "framed" : true
         }
-    ,   { "id"     : "smallphroge"
-        , "name"   : "Merry Crisis!"
-        , "authors": ["smallphroge"]
-        , "day"    : 25
-        , "medal"  : true
-        }
-    ,   { "id"     : "tamag0"
-        , "name"   : "LOOK OUT BELOW"
-        , "authors": ["tamag0"]
-        , "day"    : 26
-        , "medal"  : true
-    }
     ]
 ,   "events":
     {
