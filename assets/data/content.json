@@ -66,6 +66,8 @@
     , "smallphroge"      : { "proper": "smallphroge"       }
     , "tamag0"           : { "proper": "tamag0"            }
     , "phonometrologist" : { "proper": "Phonometrologist"  }
+    , "lobstermango"     : { "proper": "LobsterMango"      }
+    , "shidonidrella"    : { "proper": "ShidoniDrella"     }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -358,7 +360,20 @@
         , "authors": ["tamag0"]
         , "day"    : 26
         , "medal"  : true
-    }
+        }
+    ,   { "id"     : "lobstermango"
+        , "name"   : "Untitled"
+        , "authors": ["lobstermango"]
+        , "day"    : 27
+        , "medal"  : true
+        }
+    ,   { "id"     : "convict_sukz"
+        , "name"   : "Convict Sukz"
+        , "authors": ["shidonidrella:writing", "space-agewrangler:art"]
+        , "day"    : 27
+        , "medal"  : false
+        , "comic"  : {"pages": 17}
+        }
     ]
 ,   "events":
     {
