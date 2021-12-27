@@ -317,7 +317,7 @@
         , "medal"  : true
     }
     ,   { "id"     : "knosedoge"
-        , "name"   : "CLOSE TO YOU"
+        , "name"   : "close to you"
         , "authors": ["knosedoge"]
         , "day"    : 27
         , "medal"  : false
@@ -367,7 +367,7 @@
         , "framed" : true
         }
     ,   { "id"     : "space-agewrangler2"
-        , "name"   : "???"
+        , "name"   : "Untitled"
         , "authors": ["space-agewrangler"]
         , "day"    : 27
         , "medal"  : false
