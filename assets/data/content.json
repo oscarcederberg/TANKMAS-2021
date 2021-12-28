@@ -368,9 +368,9 @@
         , "medal"  : true
         }
     ,   { "id"     : "convict_sukz"
-        , "name"   : "Convict Sukz"
+        , "name"   : "Post-Rumble Tranquility"
         , "authors": ["shidonidrella:writing", "space-agewrangler:art"]
-        , "day"    : 27
+        , "day"    : 28
         , "medal"  : false
         , "comic"  : {"pages": 17}
         }
