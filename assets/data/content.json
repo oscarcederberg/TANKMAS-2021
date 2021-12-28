@@ -66,7 +66,10 @@
     , "smallphroge"      : { "proper": "smallphroge"       }
     , "tamag0"           : { "proper": "tamag0"            }
     , "phonometrologist" : { "proper": "Phonometrologist"  }
-    , "lobstermango" : { "proper": "Lobstermango"  }
+    , "lobstermango"     : { "proper": "Lobstermango"      }
+    , "thisisnotarchie"  : { "proper": "ThisisNotArchie"   }
+    , "prodmarrow"       : { "proper": "ProdMARROW"        }
+    , "shidonidrella"    : { "proper": "ShidoniDrella"     }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -147,6 +150,15 @@
         , "key"      : "c#Maj"
         , "bpm"      : 114
         , "day"      : 25
+        }
+    ,   { "id"       : "prodmarrow"
+        , "name"     : "Tankmas in Toytown"
+        , "authors"  : ["prodmarrow"]
+        , "key"      : "c#Maj"
+        , "bpm"      : 160
+        , "loopStart": 9000
+        , "loopEnd"  : 108000
+        , "day"      : 28
         }
     ]
 ,   "artwork":
@@ -372,6 +384,19 @@
         , "day"    : 27
         , "medal"  : false
         , "framed" : true
+        }
+    ,   { "id"     : "convict_sukz"
+        , "name"   : "Post-Rumble Tranquility"
+        , "authors": ["shidonidrella:writing","space-agewrangler:art"]
+        , "day"    : 28
+        , "medal"  : false
+        , "comic"  : {"pages": 17}
+        }
+    ,   { "id"     : "thisisnotarchie"
+        , "name"   : "Untitled"
+        , "authors": ["thisisnotarchie"]
+        , "day"    : 28
+        , "medal"  : true
         }
     ]
 ,   "events":
