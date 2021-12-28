@@ -51,6 +51,9 @@ class VillageState extends RoomState
             if(tree != null){
                 treeShader = new PeekDitherShader(tree);
                 tree.shader = treeShader;
+                
+                if (player.y < TREE_HIDE_Y)
+                    treeShader.setAlpha(0);
             }
         }
 
