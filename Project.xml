@@ -111,6 +111,9 @@
 	<assets path="assets/notes/guitar_el"    exclude="*.wav" library="guitar_el" />
 	<assets path="assets/notes/piano"        exclude="*.wav" library="piano" />
 	
+	<library name="convict_sukz" preload="false" />
+	<assets path="assets/comics/convict_sukz" rename="assets/convict_sukz" library="convict_sukz"/>
+	
 	<define name="ADVENT"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
