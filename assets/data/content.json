@@ -70,6 +70,7 @@
     , "thisisnotarchie"  : { "proper": "ThisisNotArchie"   }
     , "prodmarrow"       : { "proper": "ProdMARROW"        }
     , "shidonidrella"    : { "proper": "ShidoniDrella"     }
+    , "mayalacookie"     : { "proper": "MayaLaCookie"      }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -388,13 +389,19 @@
     ,   { "id"     : "convict_sukz"
         , "name"   : "Post-Rumble Tranquility"
         , "authors": ["shidonidrella:writing","space-agewrangler:art"]
-        , "day"    : 28
+        , "day"    : 29
         , "medal"  : false
         , "comic"  : {"pages": 17}
         }
     ,   { "id"     : "thisisnotarchie"
         , "name"   : "Untitled"
         , "authors": ["thisisnotarchie"]
+        , "day"    : 28
+        , "medal"  : true
+        }
+    ,   { "id"     : "mayalacookie"
+        , "name"   : "The Night in Winter Wonderland"
+        , "authors": ["mayalacookie"]
         , "day"    : 28
         , "medal"  : true
         }
