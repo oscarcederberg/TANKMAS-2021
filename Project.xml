@@ -114,8 +114,8 @@
 	<library name="convict_sukz" preload="false" />
 	<assets path="assets/comics/convict_sukz" rename="assets/convict_sukz" library="convict_sukz"/>
 
-	<library name="daintiest_knoblin" preload="false" />
-	<assets path="assets/comics/daintiest_knoblin" rename="assets/daintiest_knoblin" library="daintiest_knoblin"/>
+	<!-- <library name="daintiest_knoblin" preload="false" />
+	<assets path="assets/comics/daintiest_knoblin" rename="assets/daintiest_knoblin" library="daintiest_knoblin"/> -->
 	
 	<define name="ADVENT"/>
 
