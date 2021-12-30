@@ -71,6 +71,7 @@
     , "prodmarrow"       : { "proper": "ProdMARROW"        }
     , "shidonidrella"    : { "proper": "ShidoniDrella"     }
     , "mayalacookie"     : { "proper": "MayaLaCookie"      }
+    , "shirogaia"        : { "proper": "ShiroGaia"         }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -403,6 +404,12 @@
         , "name"   : "The Night in Winter Wonderland"
         , "authors": ["mayalacookie"]
         , "day"    : 29
+        , "medal"  : true
+        }
+    ,   { "id"     : "shirogaia"
+        , "name"   : "X-mas Date"
+        , "authors": ["shirogaia"]
+        , "day"    : 30
         , "medal"  : true
         }
     ]
