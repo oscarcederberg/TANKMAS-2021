@@ -27,6 +27,7 @@ class BootState extends flixel.FlxState
     inline static var MSG_TIME = 1.5;
     var msg:FlxBitmapText;
     var timeout:FlxTimer;
+    var refreshTimer:FlxTimer;
     var state = LoggingIn;
     var waitTime = 0.0;
     
@@ -356,7 +357,7 @@ class BootState extends flixel.FlxState
             }
         }
         
-        new FlxTimer().start(5, (t)->NGio.updateServerVersion(checkServerVersion.bind(t)), 0);
+        refreshTimer = new FlxTimer().start(5, (t)->NGio.updateServerVersion(checkServerVersion.bind(t)), 0);
     }
     
     inline function setCenteredNokiaMessage(text:String)
@@ -390,6 +391,9 @@ class BootState extends flixel.FlxState
     
     function onComplete()
     {
+        if (refreshTimer != null)
+            refreshTimer.cancel();
+        
         preloadArt();
         
         Game.goToInitialRoom();

@@ -1,20 +1,21 @@
 package states.rooms;
 
-import vfx.PeekDitherShader;
-import data.NGio;
-import io.newgrounds.NG;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import data.Manifest;
-import states.OgmoState;
 import data.Calendar;
-import data.Game;
 import data.Content;
+import data.Game;
+import data.NGio;
+import data.Manifest;
 import props.Cabinet;
+import props.Teleport;
+import states.OgmoState;
+import states.rooms.RoomState;
 import ui.Prompt;
+import vfx.PeekDitherShader;
 
 import flixel.FlxG;
 import flixel.math.FlxMath;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 
 class VillageState extends RoomState
 {
@@ -31,9 +32,19 @@ class VillageState extends RoomState
         
         add(new vfx.Snow(40));
 
-        if(Game.state.match(Intro(Started))){
+        if(Game.state.match(Intro(Started)))
+        {
             Game.state = Intro(Village);
             showIntroCutscene();
+        }
+    }
+    
+    override function hasTeleportNotifs(teleport:Teleport)
+    {
+        return switch(teleport.target.split(".")[0])
+        {
+            case RoomName.Cafe: CafeState.hasNotifs();
+            default: false;
         }
     }
     

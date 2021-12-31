@@ -142,6 +142,12 @@ class Save
         
         log("saved order: " + (data.cafeOrder == null ? "random" : data.cafeOrder));
         
+        // if (clearSave || data.seenYeti == null)
+        {
+            data.seenYeti = false;
+            newData = true;
+        }
+        
         if (data.instrument < -1 && data.seenInstruments.countTrue() > 0)
         {
             // fix an old glitch where i deleted instrument save
@@ -416,6 +422,20 @@ class Save
     inline static public function toggleShowName()
         return showName = !showName;
     
+    inline static public function seenYeti()
+    {
+        return data.seenYeti;
+    }
+    
+    inline static public function yetiSeen()
+    {
+        if (data.seenYeti == false)
+        {
+            data.seenYeti = true;
+            flush();
+        }
+    }
+    
     /* --- --- --- --- 2020 --- --- --- --- */
     
     static public function getNgioSessionId2020():Null<String>
@@ -513,4 +533,5 @@ typedef SaveData = SaveData2020 &
     var medalsUnlocked2020:Array<Int>;
     var showName:Bool;
     var cafeOrder:Order;
+    var seenYeti:Bool;
 }

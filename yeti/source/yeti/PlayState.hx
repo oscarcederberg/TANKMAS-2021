@@ -29,7 +29,7 @@ class PlayState extends FlxState
 	var tileSeq:Array<LightColor>;
 	var allColors:Array<LightColor> = [RED, BLUE, GREEN];
 	var seqMax:Int = 2;
-	var seqTimer:FlxTimer = new FlxTimer();
+	var seqTimer:FlxTimer;
 
 	var score:Int = 0;
 	var scoreText:FlxText;
@@ -43,6 +43,9 @@ class PlayState extends FlxState
 
 	override function create()
 	{
+		// Can't create FlxTimers at declaration it fucks with advents arcade timer manager
+		seqTimer = new FlxTimer();
+		
 		if (FlxG.sound.music == null)
 			FlxG.sound.playMusic(Global.asset('assets/music/play_theme.mp3'), 0.35);
 

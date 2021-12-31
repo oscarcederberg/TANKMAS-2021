@@ -437,11 +437,14 @@
         , "day"    : 0
         , "type"   : "external"
         }
-    ,   { "id"     : "2018"
+    ]
+,   "unused_arcades":
+    [   { "id"     : "2018"
         , "name"   : "Christmas ADVENTure 2018"
         , "authors": [ "ninjamuffin99", "brandybuizel"]
         , "day"    : 0
         , "type"   : "external"
+        , "comment": "I didn't have room in the cafe for this so I took it out :("
         }
     ]
 ,   "medals":
