@@ -142,7 +142,7 @@ class Save
         
         log("saved order: " + (data.cafeOrder == null ? "random" : data.cafeOrder));
         
-        // if (clearSave || data.seenYeti == null)
+        if (clearSave || data.seenYeti == null)
         {
             data.seenYeti = false;
             newData = true;
