@@ -72,6 +72,9 @@
     , "shidonidrella"    : { "proper": "ShidoniDrella"     }
     , "mayalacookie"     : { "proper": "MayaLaCookie"      }
     , "shirogaia"        : { "proper": "ShiroGaia"         }
+    , "snackers"         : { "proper": "Snackers"          }
+    , "cryptosphere"     : { "proper": "Cryptosphere"      }
+    , "projectsoary"     : { "proper": "ProjectSoary"      }
     , "migmoog"          : { "proper": "MigMoog"           }
 
     , "ninjamuffin99":
@@ -162,6 +165,13 @@
         , "loopStart": 9000
         , "loopEnd"  : 108000
         , "day"      : 28
+        }
+    ,   { "id"       : "projectsoary"
+        , "name"     : "Tankmas Adventure 2021"
+        , "authors"  : ["projectsoary"]
+        , "key"      : "aMaj"
+        , "bpm"      : 150
+        , "day"      : 31
         }
     ]
 ,   "artwork":
@@ -411,6 +421,12 @@
         , "name"   : "Datemas with the Funks"
         , "authors": ["shirogaia"]
         , "day"    : 30
+        , "medal"  : true
+        }
+    ,   { "id"     : "snackers"
+        , "name"   : "Orla's Lights"
+        , "authors": ["snackers"]
+        , "day"    : 31
         , "medal"  : true
         }
     ]
