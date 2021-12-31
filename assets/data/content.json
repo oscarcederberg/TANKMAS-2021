@@ -435,7 +435,7 @@
     }
 ,   "arcades":
     [   { "id"     : "yeti"
-        , "name"   : "Festive Forage"
+        , "name"   : "Holy Crap a Yeti"
         , "authors": ["migmoog", "danfrombavaria:music"]
         , "day"    : 30
         , "mobile" : false

@@ -148,6 +148,9 @@ class PlayState extends FlxState
 			loseText.screenCenter();
 			loseText.color = tileSeq[iSpot];
 			add(loseText);
+			#if ADVENT
+			data.NGio.postPlayerHiscore("yeti", score);
+			#end
 
 			FlxTween.tween(loseText, {'scale.x': 1, 'scale.y': 1}, 0.4, {
 				onStart: (_) -> loseText.visible = true,
@@ -172,12 +175,12 @@ class PlayState extends FlxState
 				yeti.animation.play('freeze', true);
 				score++;
 				#if ADVENT
-				// if (score > 40)
-				// 	data.NGio.unlockMedalByName('yeti_doctorate');
-				// else if (score > 30)
-				// 	data.NGio.unlockMedalByName('yeti_masters_degree');
-				// else if (score > 15)
-				// 	data.NGio.unlockMedalByName('yeti_degree');
+				if (score > 40)
+					data.NGio.unlockMedalByName('yeti_doctorate');
+				else if (score > 30)
+					data.NGio.unlockMedalByName('yeti_masters_degree');
+				else if (score > 15)
+					data.NGio.unlockMedalByName('yeti_degree');
 				#end
 				lightShowTime += 0.05;
 				returnBoard();
