@@ -1,10 +1,13 @@
 package states.rooms;
 
+import data.Game;
+import data.Manifest;
 import ui.Prompt;
 import data.Save;
 import data.Calendar;
 import data.Content;
 import data.Net;
+import props.Cabinet;
 import props.CafeTable;
 import props.GhostPlayer;
 import props.Player;
@@ -35,6 +38,8 @@ class CafeState extends RoomState
     
     override function create()
     {
+        entityTypes["Cabinet"] = cast initCabinet;
+        
         var seatsByName = new Map<String, FlxObject>();
         var placematsByName = new Map<String, Placemat>();
         entityTypes["Seat"] = cast function (data:OgmoEntityData<NamedEntity>)
@@ -76,6 +81,63 @@ class CafeState extends RoomState
         
         initPlacemats(seatsByName, placematsByName);
     }
+    
+    // --- --- --- --- --- --- Cabinets --- --- --- --- --- --- --- ---
+    
+    function initCabinet(data:OgmoEntityData<CabinetValues>)
+    {
+        var cabinet = Cabinet.fromEntity(data);
+        if (cabinet.enabled)
+            addHoverTextTo(cabinet, cabinet.data.name, playCabinet.bind(cabinet.data));
+        
+        return cabinet;
+    }
+    
+    function playCabinet(data:ArcadeCreation)
+    {
+        if (data.mobile == false && FlxG.onMobile)
+            Prompt.showOKInterrupt("This game is not available on mobile\n...yet.");
+        else
+        {
+            switch(data.type)
+            {
+                case State: Game.goToArcade(cast data.id);
+                case Overlay: openOverlayArcade(cast data.id);
+                case External: openExternalArcade(cast data.id);
+            }
+        }
+    }
+    
+    function openOverlayArcade(id:ArcadeName)
+    {
+        if (FlxG.sound.music != null)
+            FlxG.sound.music.stop();
+        FlxG.sound.music = null;
+        
+        var overlay = Game.createArcadeOverlay(id);
+        overlay.closeCallback = ()->
+        {
+            if (FlxG.sound.music != null)
+                FlxG.sound.music.stop();
+            Manifest.playMusic(Game.chosenSong);
+        }
+        openSubState(overlay);
+    }
+    
+    function openExternalArcade(id:ArcadeName)
+    {
+        var url = switch(id)
+        {
+            case Advent2018: "https://www.newgrounds.com/portal/view/721061";
+            case Advent2019: "https://www.newgrounds.com/portal/view/743161";
+            case Advent2020: "https://www.newgrounds.com/portal/view/773236";
+            default:
+                throw "Unhandled arcade id:" + id;
+        }
+        openUrl(url);
+    }
+    
+    // --- --- --- --- --- --- Waiter --- --- --- --- --- --- --- ---
     
     /**
      * This a doozy, map seats to placemats by ids, create a group for each table and

@@ -101,6 +101,11 @@ class OverlaySubstate extends flixel.FlxSubState
             close();
     }
     
+    public function cancelTweensOf(object, ?fieldPaths)
+    {
+        tweens.cancelTweensOf(object, fieldPaths);
+    }
+    
     public function switchState(nextState:FlxState)
     {
 		if (state.switchTo(nextState))

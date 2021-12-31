@@ -22,9 +22,7 @@ enum abstract Order(String) to String
         switch (cast this:Order)
         {
             case RANDOM: throw "no frame for order:RANDOM";
-            case order: 
-                trace('${order.toInt() - 1} * 2 + ${Math.ceil(percentFull * (NUM_FRAMES - 1))}'
-                    + ' = ${(order.toInt() - 1) * NUM_FRAMES + Math.ceil(percentFull * (NUM_FRAMES - 1))}');
+            case order:
                 return (order.toInt() - 1) * NUM_FRAMES + Math.ceil(percentFull * (NUM_FRAMES - 1));
         }
     }

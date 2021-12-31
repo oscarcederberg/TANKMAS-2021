@@ -72,6 +72,7 @@
     , "shidonidrella"    : { "proper": "ShidoniDrella"     }
     , "mayalacookie"     : { "proper": "MayaLaCookie"      }
     , "shirogaia"        : { "proper": "ShiroGaia"         }
+    , "migmoog"          : { "proper": "MigMoog"           }
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -416,10 +417,39 @@
 ,   "events":
     {
     }
-,   "arcades":[]
+,   "arcades":
+    [   { "id"     : "yeti"
+        , "name"   : "Festive Forage"
+        , "authors": ["migmoog", "danfrombavaria:music"]
+        , "day"    : 30
+        , "mobile" : false
+        , "type"   : "overlay"
+        }
+    ,   { "id"     : "2020"
+        , "name"   : "Christmas ADVENTure 2020"
+        , "authors": [ "geokureli", "brandybuizel" ]
+        , "day"    : 0
+        , "type"   : "external"
+        }
+    ,   { "id"     : "2019"
+        , "name"   : "Christmas ADVENTure 2019"
+        , "authors": [ "geokureli", "brandybuizel" ]
+        , "day"    : 0
+        , "type"   : "external"
+        }
+    ,   { "id"     : "2018"
+        , "name"   : "Christmas ADVENTure 2018"
+        , "authors": [ "ninjamuffin99", "brandybuizel"]
+        , "day"    : 0
+        , "type"   : "external"
+        }
+    ]
 ,   "medals":
     { "welcome_to_the_village": 66220
     , "warm_winter_feelings": 66219
+    , "yeti_degree": 66268
+    , "yeti_masters_degree": 66269
+    , "yeti_doctorate": 66270
     }
 ,   "instruments":
     [   { "id"    : "guitar_ac"
