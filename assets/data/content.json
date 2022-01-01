@@ -86,6 +86,7 @@
     , "m1roart"          : { "proper": "M1roArt"           }
     , "czyszy"           : { "proper": "CzySzy"            }
     , "aramort"          : { "proper": "ARAMort"           }
+    , "kolani"           : { "proper": "KOLANI"            }
 
 
     , "ninjamuffin99":
@@ -462,44 +463,52 @@
         , "comic": {"pages": 15}
         }
     ,   { "id"     : "jcaluger"
-        , "name"   : "Orla's Lights"
+        , "name"   : "Warm Welcome"
         , "authors": ["jcaluger"]
         , "day"    : 32
         , "medal"  : false
         , "framed" : true
         }
     ,   { "id"     : "nuclear-smash"
-        , "name"   : "Orla's Lights"
+        , "name"   : "Preparing for Tankmas"
         , "authors": ["nuclear-smash"]
         , "day"    : 32
         , "medal"  : false
         , "framed" : true
         }
     ,   { "id"     : "midgersausage"
-        , "name"   : "Orla's Lights"
+        , "name"   : "Panic! In The Apparel"
         , "authors": ["midgetsausage"]
         , "day"    : 32
         , "medal"  : false
         , "framed" : true
         }
     ,   { "id"     : "mismash"
-        , "name"   : "Orla's Lights"
+        , "name"   : "???"
         , "authors": ["mismash"]
         , "day"    : 32
         , "medal"  : false
         , "framed" : true
         }
     ,   { "id"     : "p-pamda"
-        , "name"   : "Orla's Lights"
+        , "name"   : "Quality Time"
         , "authors": ["p-pamda"]
         , "day"    : 32
         , "medal"  : false
         , "framed" : true
         }
     ,   { "id"     : "m1roart"
-        , "name"   : "Orla's Lights"
+        , "name"   : "Father Son Christmas"
         , "authors": ["m1roart"]
         , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "kolani"
+        , "name"   : "???"
+        , "authors": ["kolani"]
+        , "day"    : 32
+        , "ext"    : "jpg"
         , "medal"  : false
         , "framed" : true
         }
