@@ -306,7 +306,14 @@ class PlayState extends FlxState
 			spt.color = spt.clr = tileSeq[i];
 			spots.add(spt);
 			spt.animation.finishCallback = (n:String) -> if (n == 'emerge') spt.allowCollisions = ANY;
+			spt.solid = false;
 			spt.animation.play('emerge');
+			spt.animation.finishCallback = (name)->
+			{
+				spt.solid = true;
+				spt.animation.finishCallback = null;
+			}
+			
 			prevClr = tileSeq[i];
 		}
 	}
