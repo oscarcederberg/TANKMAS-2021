@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Tankmas2021" file="Tankmas2021" main="Main" version="2.3.8" company="Newgrounds" />
+	<app title="Tankmas2021" file="Tankmas2021" main="Main" version="2.4.0" company="Newgrounds" />
 
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
@@ -86,6 +86,17 @@
 	<assets path="assets/artwork" library="noPreload" include="*.png|*.jpg|*.jpeg"/>
 	<assets path="assets/movies" library="noPreload" if="INCLUDE_MOVIES" />
 	
+	<define name="ADVENT"/>
+	<define name="INCLUDE_YETI_GAME"/>
+	<section if="INCLUDE_YETI_GAME">
+		<define name="SKIP_TO_YETI_GAME" if="debug"/>
+		
+		<classpath name="yeti/source"/>
+		<library name="yeti" preload="false" />
+		<assets path="yeti/assets" rename="assets/arcades/yeti" library="yeti" exclude="*.ase|*.wav" />
+		
+	</section>
+	
 	<!-- <define name="PRELOAD_INSTRUMENTS"/> -->
 	<define name="PRELOAD_INSTRUMENTS" if="PRELOAD_ALL"/>
 	<section if="PRELOAD_INSTRUMENTS">
@@ -113,6 +124,12 @@
 	
 	<library name="convict_sukz" preload="false" />
 	<assets path="assets/comics/convict_sukz" rename="assets/convict_sukz" library="convict_sukz"/>
+
+	<library name="daintiest_knoblin" preload="false" />
+	<assets path="assets/comics/daintiest_knoblin" rename="assets/daintiest_knoblin" library="daintiest_knoblin"/>
+
+	<library name="the_wreaths" preload="false" />
+	<assets path="assets/comics/the_wreaths" rename="assets/the_wreaths" library="the_wreaths"/>
 
 	<!-- <library name="daintiest_knoblin" preload="false" />
 	<assets path="assets/comics/daintiest_knoblin" rename="assets/daintiest_knoblin" library="daintiest_knoblin"/> -->

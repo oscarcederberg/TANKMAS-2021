@@ -25,9 +25,21 @@ class OverlayGlobal
         container.switchState(state);
     }
     
+    static public function resetState()
+    {
+        switchState(Type.createInstance(Type.getClass(container.state), []));
+    }
+    
+    static public function cancelTweensOf(object, ?fieldPaths)
+    {
+        container.cancelTweensOf(object, fieldPaths);
+    }
+    
     static public function asset(path:String):String
     {
         final id = container.data.id;
-        return id + ":" + path.split("assets/").join('assets/arcades/$id/');
+        path = id + ":" + path.split("assets/").join('assets/arcades/$id/');
+        trace(path);
+        return path;
     }
 }

@@ -82,7 +82,7 @@ class Content
             arcadeData.path = 'assets/images/props/cabinets/${arcadeData.id}.png';
             arcadeData.medalPath = 'assets/images/medals/${arcadeData.id}.png';
             if (arcadeData.medal == null)
-                arcadeData.medal = arcadeData.type != External;
+                arcadeData.medal = false;
             if (arcadeData.scoreboard == null)
                 arcadeData.scoreboard = arcadeData.name;
             arcades[arcadeData.id] = arcadeData;
@@ -389,8 +389,8 @@ class Content
             }
         }
         
-        var cabinetIds = getEntityIds("arcade", "Cabinet");
-        var teleportIds = getEntityIds("arcade", "Teleport");
+        var cabinetIds = getEntityIds("cafe", "Cabinet");
+        var teleportIds = getEntityIds("cafe", "Teleport");
         for (arcade in arcades)
         {
             if (arcade.day != null && arcade.day <= Calendar.day)
@@ -688,12 +688,10 @@ typedef MovieCreation = Creation &
 
 enum abstract ArcadeName(String) to String
 {
-    var Digging = "digging";
-    var Chimney = "chimney";
-    var Horse = "horse";
-    var Positivity = "positivity";
+    var Yeti = "yeti";
     var Advent2018 = "2018";
     var Advent2019 = "2019";
+    var Advent2020 = "2020";
 }
 
 enum abstract ArcadeType(String) to String

@@ -1,18 +1,22 @@
 package states.rooms;
 
-import ui.Prompt;
+import data.Game;
+import data.Manifest;
 import data.Save;
 import data.Calendar;
 import data.Content;
 import data.Net;
+import props.Cabinet;
 import props.CafeTable;
 import props.GhostPlayer;
+import props.Notif;
 import props.Player;
 import props.Placemat;
 import props.SpeechBubble;
 import props.SpeechBubbleQueue;
 import props.Waiter;
 import states.OgmoState;
+import ui.Prompt;
 import utils.DebugLine;
 
 import flixel.FlxG;
@@ -25,6 +29,12 @@ import flixel.math.FlxVector;
 
 class CafeState extends RoomState
 {
+    static public function hasNotifs()
+    {
+        return Save.getOrder() == RANDOM
+            || (Save.seenYeti() == false && Calendar.day >= 31);
+    }
+    
     var seats = new FlxTypedGroup<FlxObject>();
     var spots = new Map<FlxObject, Placemat>();
     var tableSeats = new Map<FlxObject, CafeTable>();
@@ -33,8 +43,12 @@ class CafeState extends RoomState
     var tables = new Array<CafeTable>();
     var patrons = new Map<Player, Placemat>();
     
+    var yetiNotif:Notif;
+    
     override function create()
     {
+        entityTypes["Cabinet"] = cast initCabinet;
+        
         var seatsByName = new Map<String, FlxObject>();
         var placematsByName = new Map<String, Placemat>();
         entityTypes["Seat"] = cast function (data:OgmoEntityData<NamedEntity>)
@@ -64,6 +78,8 @@ class CafeState extends RoomState
         
         super.create();
         
+        if (yetiNotif != null)
+            topGround.add(yetiNotif);
         
         #if debug
         if (waiterNodes != null)
@@ -76,6 +92,77 @@ class CafeState extends RoomState
         
         initPlacemats(seatsByName, placematsByName);
     }
+    
+    // --- --- --- --- --- --- Cabinets --- --- --- --- --- --- --- ---
+    
+    function initCabinet(data:OgmoEntityData<CabinetValues>)
+    {
+        var cabinet = Cabinet.fromEntity(data);
+        if (cabinet.enabled)
+            addHoverTextTo(cabinet, cabinet.data.name, playCabinet.bind(cabinet.data));
+        
+        if (cabinet.data.id == Yeti && Save.seenYeti() == false)
+        {
+            yetiNotif = new Notif(0, cabinet.y - 16);
+            yetiNotif.x = cabinet.x + (cabinet.width - yetiNotif.width) / 2;
+            yetiNotif.animate();
+        }
+        
+        return cabinet;
+    }
+    
+    function playCabinet(data:ArcadeCreation)
+    {
+        if (data.id == Yeti && yetiNotif != null)
+        {
+            Save.yetiSeen();
+            yetiNotif.kill();
+            yetiNotif = null;
+        }
+        
+        if (data.mobile == false && FlxG.onMobile)
+            Prompt.showOKInterrupt("This game is not available on mobile\n...yet.");
+        else
+        {
+            switch(data.type)
+            {
+                case State: Game.goToArcade(cast data.id);
+                case Overlay: openOverlayArcade(cast data.id);
+                case External: openExternalArcade(cast data.id);
+            }
+        }
+    }
+    
+    function openOverlayArcade(id:ArcadeName)
+    {
+        if (FlxG.sound.music != null)
+            FlxG.sound.music.stop();
+        FlxG.sound.music = null;
+        
+        var overlay = Game.createArcadeOverlay(id);
+        overlay.closeCallback = ()->
+        {
+            if (FlxG.sound.music != null)
+                FlxG.sound.music.stop();
+            Manifest.playMusic(Game.chosenSong);
+        }
+        openSubState(overlay);
+    }
+    
+    function openExternalArcade(id:ArcadeName)
+    {
+        var url = switch(id)
+        {
+            case Advent2018: "https://www.newgrounds.com/portal/view/721061";
+            case Advent2019: "https://www.newgrounds.com/portal/view/743161";
+            case Advent2020: "https://www.newgrounds.com/portal/view/773236";
+            default:
+                throw "Unhandled arcade id:" + id;
+        }
+        openUrl(url);
+    }
+    
+    // --- --- --- --- --- --- Waiter --- --- --- --- --- --- --- ---
     
     /**
      * This a doozy, map seats to placemats by ids, create a group for each table and

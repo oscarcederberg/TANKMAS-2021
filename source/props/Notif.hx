@@ -23,14 +23,48 @@ class Notif extends flixel.FlxSprite
         tween = FlxTween.tween(this, { "offset.y": height - 8 }, 0.75, { type:PINGPONG, ease:FlxEase.sineInOut, loopDelay: 0.25 });
     }
     
-    override function destroy()
+    override function draw()
     {
-        super.destroy();
+        var pos = getPosition();
+        var camera = this.camera;
         
+        // always on screen
+        if (x < camera.scroll.x)
+            x = camera.scroll.x;
+        else
+        if (x > camera.scroll.x + camera.width - width)
+            x = camera.scroll.x + camera.width - width;
+        
+        if (y < camera.scroll.y + height)
+            y = camera.scroll.y + height;
+        else
+        if (y > camera.scroll.y + camera.height)
+            y = camera.scroll.y + camera.height;
+        
+        super.draw();
+        
+        setPosition(pos.x, pos.y);
+        pos.put();
+    }
+    
+    inline function stopAnimate()
+    {
         if (tween != null)
         {
             tween.cancel();
             tween = null;
         }
+    }
+    
+    override function kill()
+    {
+        super.kill();
+        stopAnimate();
+    }
+    
+    override function destroy()
+    {
+        super.destroy();
+        stopAnimate();
     }
 }

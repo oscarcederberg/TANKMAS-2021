@@ -75,6 +75,8 @@ class RoomState extends OgmoState
     var skinPopup:SkinPopup;
     var instrument:FlxButton;
     
+    var waypointNotifs = new FlxTypedGroup<Notif>();
+    
     public var name(default, null):RoomName;
     public var spawnId(default, null):String = null;
     public var forceDay(default, null) = -1;
@@ -186,8 +188,22 @@ class RoomState extends OgmoState
         if (teleport.target != "" && teleport.target.indexOf(".") == -1)
             teleport.target += "." + name;
         
+        if (hasTeleportNotifs(teleport))
+        {
+            var notif = new Notif();
+            notif.x = teleport.x + (teleport.width - notif.width) / 2;
+            notif.y = teleport.y;
+            notif.animate();
+            waypointNotifs.add(notif);
+        }
+        
         teleports.add(teleport);
         return teleport;
+    }
+    
+    function hasTeleportNotifs(teleport:Teleport)
+    {
+        return false;
     }
     
     function initNpc(data, ?skin, ?name, isUser = false)
@@ -231,6 +247,7 @@ class RoomState extends OgmoState
         background = getByName("Background");
         add(topGround);
         topGround.add(infoBoxGroup);
+        topGround.add(waypointNotifs);
         
         geom = getByName("Geom");
         colliders.add(geom);

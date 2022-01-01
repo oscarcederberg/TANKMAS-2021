@@ -2,6 +2,7 @@ package data;
 
 import data.Content;
 import data.Calendar;
+import states.OverlaySubstate;
 import states.rooms.RoomState;
 import states.rooms.*;
 import ui.Controls;
@@ -63,6 +64,9 @@ class Game
         addRoom(TownHall     , TownHallState.new);
         
         arcadeTypes = [];
+        #if INCLUDE_YETI_GAME
+        arcadeTypes[Yeti] = yeti.PlayState.new.bind(0);
+        #end
         
         var showIntro
         #if SKIP_INTRO
@@ -125,6 +129,15 @@ class Game
         Game.goToRoom(initialRoom);
     }
     
+    static public function createArcadeOverlay(id:ArcadeName)
+    {
+        if (arcadeTypes.exists(id))
+            return new OverlaySubstate(Content.arcades[id], arcadeTypes[id]());
+        
+        throw "Unhandled arcade id:" + id;
+    }
+    
+    /** Switches the state to an arcade game state */
     static public function goToArcade(name:ArcadeName):Void
     {
         if (!arcadeTypes.exists(name))
