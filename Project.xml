@@ -130,9 +130,6 @@
 
 	<library name="the_wreaths" preload="false" />
 	<assets path="assets/comics/the_wreaths" rename="assets/the_wreaths" library="the_wreaths"/>
-
-	<!-- <library name="daintiest_knoblin" preload="false" />
-	<assets path="assets/comics/daintiest_knoblin" rename="assets/daintiest_knoblin" library="daintiest_knoblin"/> -->
 	
 	<define name="ADVENT"/>
 

@@ -458,7 +458,7 @@
     ,   { "id"     : "daintiest_knoblin"
         , "name"   : "The Daintiest Knoblin"
         , "authors": ["cryptosphere:writing", "mrshmoods:art"]
-        , "day"    : 31
+        , "day"    : 33
         , "medal"  : false
         , "comic": {"pages": 15}
         }
@@ -484,7 +484,7 @@
         , "framed" : true
         }
     ,   { "id"     : "mismash"
-        , "name"   : "???"
+        , "name"   : "Untitled"
         , "authors": ["mismash"]
         , "day"    : 32
         , "medal"  : false
