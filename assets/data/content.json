@@ -25,14 +25,17 @@
         }
     , "midgetsausage":
         { "proper": "SantaSausage"
-        , "roles"  : ["Additional disk art"]
+        , "roles" : ["Additional disk art"]
+        }
+    , "mrshmoods": 
+        { "proper": "MrShmoods"
+        , "roles" : ["Concept art"]
         }
     , "cymbourine"       : { "proper": "Cymbourine"        }
     , "mintyeggs"        : { "proper": "mintyeggs"         }
     , "bigtexastony"     : { "proper": "BigTexasTony"      }
     , "technocookie"     : { "proper": "TechnoCookie"      }
     , "albegian"         : { "proper": "AlbeGian"          }
-    , "mrshmoods"        : { "proper": "MrShmoods"         }
     , "curruff"          : { "proper": "Curruff"           }
     , "spadezer"         : { "proper": "Spadezer"          }
     , "oddlem"           : { "proper": "Oddlem"            }
@@ -76,6 +79,14 @@
     , "cryptosphere"     : { "proper": "Cryptosphere"      }
     , "projectsoary"     : { "proper": "ProjectSoary"      }
     , "migmoog"          : { "proper": "MigMoog"           }
+    , "nuclear-smash"    : { "proper": "nuclear-smash"     }
+    , "p-pamda"          : { "proper": "P-PAMda"           }
+    , "jcaluger"         : { "proper": "JCaluger"          }
+    , "mismash"          : { "proper": "MisMash"           }
+    , "m1roart"          : { "proper": "M1roArt"           }
+    , "czyszy"           : { "proper": "CzySzy"            }
+    , "aramort"          : { "proper": "ARAMort"           }
+
 
     , "ninjamuffin99":
         { "proper": "ninjamuffin99"
@@ -108,7 +119,7 @@
         , "bpm"      : 147
         , "loopStart": 39184
         , "volume"   : 0.5
-        , "day"      : 7
+        , "day"      : 9
         }
     ,   { "id"       : "connorgrail"
         , "name"     : "God Rest Ye Merry Gentlemen"
@@ -116,13 +127,13 @@
         , "key"      : "eMin"
         , "bpm"      : 100
         , "volume"   : 0.5
-        , "day"      : 10
+        , "day"      : 11
         }
     ,   { "id"       : "tenodiboris"
         , "name"     : "No time like Christmas"
         , "authors"  : ["tenodiboris"]
         , "volume"   : 0.5
-        , "day"      : 13
+        , "day"      : 16
         }
     ,   { "id"       : "danfrombavaria"
         , "name"     : "Nightmare before Tankmas"
@@ -130,7 +141,7 @@
         , "volume"   : 0.5
         , "key"      : "eMaj"
         , "bpm"      : 100
-        , "day"      : 16
+        , "day"      : 19
         }
     ,   { "id"       : "carmet"
         , "name"     : "Soittorasia"
@@ -138,7 +149,7 @@
         , "volume"   : 0.5
         , "key"      : "fMin"
         , "bpm"      : 90
-        , "day"      : 19
+        , "day"      : 21
         }
     ,   { "id"       : "spadezer"
         , "name"     : "Smooth World of Joy"
@@ -148,14 +159,14 @@
         , "loopStart": 9600
         , "loopEnd"  : 201600
         , "volume"   : 0.5
-        , "day"      : 22
+        , "day"      : 24
         }
     ,   { "id"       : "phonometrologist"
         , "name"     : "Sehnsucht"
         , "authors"  : ["phonometrologist"]
         , "key"      : "c#Maj"
         , "bpm"      : 114
-        , "day"      : 25
+        , "day"      : 26
         }
     ,   { "id"       : "prodmarrow"
         , "name"     : "Tankmas in Toytown"
@@ -164,7 +175,7 @@
         , "bpm"      : 160
         , "loopStart": 9000
         , "loopEnd"  : 108000
-        , "day"      : 28
+        , "day"      : 29
         }
     ,   { "id"       : "projectsoary"
         , "name"     : "Tankmas Adventure 2021"
@@ -172,6 +183,20 @@
         , "key"      : "aMaj"
         , "bpm"      : 150
         , "day"      : 31
+        }
+    ,   { "id"       : "czyszy"
+        , "name"     : "Tankowy Xmas Progression"
+        , "authors"  : ["czyszy"]
+        , "key"      : "d#Min"
+        , "bpm"      : 110
+        , "day"      : 6
+        }
+    ,   { "id"       : "aramort"
+        , "name"     : "Lights Thru the Fog"
+        , "authors"  : ["aramort"]
+        , "key"      : "aMin"
+        , "bpm"      : 130
+        , "day"      : 14
         }
     ]
 ,   "artwork":
@@ -428,6 +453,55 @@
         , "authors": ["snackers"]
         , "day"    : 31
         , "medal"  : true
+        }
+    ,   { "id"     : "daintiest_knoblin"
+        , "name"   : "The Daintiest Knoblin"
+        , "authors": ["cryptosphere:writing", "mrshmoods:art"]
+        , "day"    : 31
+        , "medal"  : false
+        , "comic": {"pages": 15}
+        }
+    ,   { "id"     : "jcaluger"
+        , "name"   : "Orla's Lights"
+        , "authors": ["jcaluger"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "nuclear-smash"
+        , "name"   : "Orla's Lights"
+        , "authors": ["nuclear-smash"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "midgersausage"
+        , "name"   : "Orla's Lights"
+        , "authors": ["midgetsausage"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "mismash"
+        , "name"   : "Orla's Lights"
+        , "authors": ["mismash"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "p-pamda"
+        , "name"   : "Orla's Lights"
+        , "authors": ["p-pamda"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
+        }
+    ,   { "id"     : "m1roart"
+        , "name"   : "Orla's Lights"
+        , "authors": ["m1roart"]
+        , "day"    : 32
+        , "medal"  : false
+        , "framed" : true
         }
     ]
 ,   "events":
