@@ -476,7 +476,7 @@
         , "medal"  : false
         , "framed" : true
         }
-    ,   { "id"     : "midgersausage"
+    ,   { "id"     : "midgetsausage"
         , "name"   : "Panic! In The Apparel"
         , "authors": ["midgetsausage"]
         , "day"    : 32
@@ -494,8 +494,8 @@
         , "name"   : "Quality Time"
         , "authors": ["p-pamda"]
         , "day"    : 32
-        , "medal"  : false
-        , "framed" : true
+        , "medal"  : true
+        , "framed" : false
         }
     ,   { "id"     : "m1roart"
         , "name"   : "Father Son Christmas"
