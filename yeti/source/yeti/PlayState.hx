@@ -1,7 +1,6 @@
 package yeti;
 
 import ui.Controls;
-
 import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -26,12 +25,13 @@ class PlayState extends FlxState
 	var board:FlxNestedSprite;
 	var spots:FlxTypedGroup<Icicle>;
 
-	var tileSeq:Array<LightColor>;
+	var tileSeq:Array<LightColor> = [];
 	var allColors:Array<LightColor> = [RED, BLUE, GREEN];
 	var seqMax:Int = 2;
-	var seqTimer:FlxTimer;
+	var seqTimer:FlxTimer = new FlxTimer();
 
 	var score:Int = 0;
+	var multiplier:Int = 1;
 	var scoreText:FlxText;
 
 	var lightsShown:Int = 0;
@@ -43,26 +43,20 @@ class PlayState extends FlxState
 
 	override function create()
 	{
-		// Can't create FlxTimers at declaration it fucks with advents arcade timer manager
-		seqTimer = new FlxTimer();
-		
 		if (FlxG.sound.music == null)
 			FlxG.sound.playMusic(Global.asset('assets/music/play_theme.mp3'), 0.35);
 
-		loseJingle.loadEmbedded(Global.asset("assets/sounds/lose_jingle.mp3"), false, false, () -> {
-			dead = true;
-			FlxG.sound.music = null;
-		});
+		loseJingle.loadEmbedded(Global.asset("assets/sounds/lose_jingle.mp3"), false, false);
 
 		var bg = new FlxSprite(Global.asset('assets/images/bg.png'));
 		add(bg);
-		
+
 		spots = new FlxTypedGroup<Icicle>();
 		add(spots);
-		
+
 		player = new Player();
 		add(player);
-		
+
 		yeti = new Yeti(0, 0, player);
 		yeti.screenCenter();
 		add(yeti);
@@ -71,15 +65,15 @@ class PlayState extends FlxState
 		board.screenCenter(X);
 		for (i in 0...3)
 		{
-			var s = new Display(
-				switch i {
-					case 0: RED;
-					case 1: BLUE;
-					case 2: GREEN;
-					default: RED;
-				}
-			);
-			s.relativeX = switch i {
+			var s = new Display(switch i
+			{
+				case 0: RED;
+				case 1: BLUE;
+				case 2: GREEN;
+				default: RED;
+			});
+			s.relativeX = switch i
+			{
 				case 0: 10;
 				case 1: 24;
 				case 2: 38;
@@ -92,7 +86,8 @@ class PlayState extends FlxState
 		}
 		add(board);
 
-		scoreText = new FlxText(Global.width - 16, 0, 0, Std.string(score));
+		scoreText = new FlxText(Global.width - 16, 0, 0, 'score: ${score}\n bonus: ${multiplier}');
+		scoreText.x = Global.width - (scoreText.width + 5);
 		add(scoreText);
 
 		FlxTween.tween(board, {y: 0}, 1.8, {
@@ -105,11 +100,12 @@ class PlayState extends FlxState
 
 	override function update(elapsed:Float)
 	{
-		if (!dead) {
+		if (!dead)
+		{
 			FlxSpriteUtil.bound(yeti, 0, Global.width, 0, Global.height);
 			FlxSpriteUtil.bound(player, 0, Global.width, 0, Global.height);
 
-			scoreText.text = Std.string(score);
+			scoreText.text = 'score: ${score}\nbonus: ${multiplier}';
 
 			FlxG.overlap(player, spots, executeSpotOverlap, processSpotOverlap);
 			FlxG.overlap(player, yeti, executeYetiKill, function(p:Player, y:Yeti)
@@ -117,11 +113,18 @@ class PlayState extends FlxState
 				return y.state == y.hunt;
 			});
 		}
-		
-		if (dead && Controls.pressed.A)
-			Global.resetState(); 
 
+		if (dead && Controls.pressed.A)
+			resetState();
+		
 		super.update(elapsed);
+	}
+	
+	function resetState()
+	{
+		FlxG.sound.music = null;
+		loseJingle.stop();
+		Global.resetState();
 	}
 
 	function executeYetiKill(player:Player, y:Yeti)
@@ -129,15 +132,16 @@ class PlayState extends FlxState
 		if (!loseJingle.playing)
 		{
 			FlxG.sound.music.stop();
-			
-			forEach((child) -> {
+
+			forEach((child) ->
+			{
 				child.active = false;
 				FlxTween.cancelTweensOf(child);
 			}, true);
-			
+
 			var msg = "YOU WERE DISEMBOWELED BY THE YETI\n" + switch (Controls.mode)
 			{
-				case Touch: "(tap to try again)";// not implemented
+				case Touch: "(tap to try again)"; // not implemented
 				case Keys: "(Z to try again)";
 				case Gamepad: "(A to try again)";
 			}
@@ -153,11 +157,14 @@ class PlayState extends FlxState
 			#end
 
 			FlxTween.tween(loseText, {'scale.x': 1, 'scale.y': 1}, 0.4, {
-				onStart: (_) -> loseText.visible = true,
-				onUpdate: (_) -> if (Controls.pressed.A) Global.resetState(),
+				onStart: (_) ->
+				{
+					loseText.visible = dead = true;
+				},
+				// onUpdate: (_) -> if (Controls.pressed.A) resetState(),
 				ease: FlxEase.quadIn
 			});
-			
+
 			loseJingle.play();
 		}
 	}
@@ -173,7 +180,7 @@ class PlayState extends FlxState
 			{
 				FlxG.sound.play(Global.asset('assets/sounds/win_jingle.mp3'), 0.5);
 				yeti.animation.play('freeze', true);
-				score++;
+				score += multiplier;
 				#if ADVENT
 				if (score > 40)
 					data.NGio.unlockMedalByName('yeti_doctorate');
@@ -183,6 +190,8 @@ class PlayState extends FlxState
 					data.NGio.unlockMedalByName('yeti_degree');
 				#end
 				lightShowTime += 0.05;
+				multiplier++;
+
 				returnBoard();
 			}
 		}
@@ -203,6 +212,8 @@ class PlayState extends FlxState
 				seqMax--;
 			lightShowTime -= 0.05;
 
+			tileSeq = [];
+			multiplier = 1;
 			returnBoard();
 			for (i in spots)
 				i.kill();
@@ -214,14 +225,14 @@ class PlayState extends FlxState
 	function pickSequence()
 	{
 		FlxG.random.shuffle(allColors);
-		tileSeq = [];
+		// tileSeq = [];
 
-		for (i in 0...seqMax)
+		for (i in (tileSeq.length - 1)...seqMax)
 			tileSeq.push(FlxG.random.getObject(allColors));
-		
+
 		if (seqMax < 26)
 			seqMax++;
-			
+
 		playBoard();
 	}
 
@@ -282,24 +293,15 @@ class PlayState extends FlxState
 			else
 				dupls = 0;
 
-			var vi:Null<Int> =
-				if (dupls != 0)
-					colorInsts[tileSeq[i]]
-				else if (dupls == 0 && colorInsts[tileSeq[i]] <= 1)
-					null
-				else
-					colorInsts[tileSeq[i]];
+			var vi:Null<Int> = if (dupls != 0) colorInsts[tileSeq[i]] else if (dupls == 0 && colorInsts[tileSeq[i]] <= 1) null else colorInsts[tileSeq[i]];
 
-			var spt = spots.recycle(
-				Icicle, 
-				() -> new Icicle(FlxG.random.int(0, 15) * 30, FlxG.random.int(0, 8) * 30, i, vi)
-			);
-			if (spt.used) {
+			var spt = spots.recycle(Icicle, () -> new Icicle(FlxG.random.int(0, 15) * 30, FlxG.random.int(0, 8) * 30, i, vi));
+			if (spt.used)
+			{
 				spt.setPosition((FlxG.random.int(0, 15) * 30), (FlxG.random.int(0, 8) * 30));
 				spt.index = i;
 				spt.txt.text = vi != null ? Std.string(vi) : ' ';
 			}
-			
 
 			spt.color = spt.clr = tileSeq[i];
 			spots.add(spt);
@@ -313,7 +315,7 @@ class PlayState extends FlxState
 	{
 		if (spots.getFirstAlive() == null)
 			yeti.state = yeti.waitForStart;
-		
+
 		iSpot = 0;
 		FlxTween.tween(board, {y: 0}, 0.8, {
 			onComplete: (_) -> pickSequence(),
@@ -327,7 +329,8 @@ class Display extends FlxNestedSprite
 	public var clr:LightColor;
 	public var sf:FlxSound;
 
-	public function new(clr:LightColor) {
+	public function new(clr:LightColor)
+	{
 		super(0, 0, Global.asset('assets/images/circle_display.png'));
 		color = this.clr = clr;
 		sf = new FlxSound().loadEmbedded(Global.asset('assets/sounds/lights/${clr}.mp3'));
@@ -353,13 +356,17 @@ class Icicle extends FlxNestedSprite
 		setSize(16, 16);
 		centerOffsets(true);
 
-		txt = new FlxNestedText(0,0,0, visualIndex != null ? Std.string(visualIndex) : ' ', 8);
+		txt = new FlxNestedText(0, 0, 0, visualIndex != null ? Std.string(visualIndex) : ' ', 8);
 		txt.relativeX = (width / 2) - (txt.width / 2);
 		txt.relativeY = (height / 2) - (txt.height / 2);
 		add(txt);
 	}
 
-	override function kill() { used = true; super.kill(); }
+	override function kill()
+	{
+		used = true;
+		super.kill();
+	}
 }
 
 enum abstract LightColor(FlxColor) to FlxColor
@@ -368,9 +375,9 @@ enum abstract LightColor(FlxColor) to FlxColor
 	var BLUE = FlxColor.BLUE;
 	var GREEN = FlxColor.GREEN;
 
-	@:to function toString() 
+	@:to function toString()
 	{
-		return switch (this) 
+		return switch (this)
 		{
 			case RED: 'red';
 			case BLUE: 'blue';
