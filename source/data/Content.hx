@@ -415,8 +415,8 @@ class Content
                         author = getUserId(author);
                         if (!creditsExists(author))
                             addError('Missing credits, author:$author');
-                        else if (!Manifest.exists(credits[author].portraitPath, IMAGE))
-                            addWarning('Missing portrait, author:$author');
+                        // else if (!Manifest.exists(credits[author].portraitPath, IMAGE))
+                        //     addWarning('Missing portrait, author:$author');
                     }
                 }
             }
