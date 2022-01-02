@@ -87,6 +87,7 @@
     , "czyszy"           : { "proper": "CzySzy"            }
     , "aramort"          : { "proper": "ARAMort"           }
     , "kolani"           : { "proper": "KOLANI"            }
+    , "voicesbycorey"    : { "proper": "VoicesByCorey"     }
 
 
     , "ninjamuffin99":
@@ -198,6 +199,13 @@
         , "key"      : "aMin"
         , "bpm"      : 130
         , "day"      : 14
+        }
+    ,   { "id"       : "splatterdash"
+        , "name"     : "Auld Lang"
+        , "authors"  : ["splatterdash"]
+        , "key"      : "eMaj"
+        , "bpm"      : 130
+        , "day"      : 33
         }
     ]
 ,   "artwork":
@@ -427,7 +435,7 @@
     ,   { "id"     : "convict_sukz"
         , "name"   : "Post-Rumble Tranquility"
         , "authors": ["shidonidrella:writing","space-agewrangler:art"]
-        , "day"    : 29
+        , "day"    : 16
         , "medal"  : false
         , "comic"  : {"pages": 17}
         }
@@ -458,7 +466,7 @@
     ,   { "id"     : "daintiest_knoblin"
         , "name"   : "The Daintiest Knoblin"
         , "authors": ["cryptosphere:writing", "mrshmoods:art"]
-        , "day"    : 33
+        , "day"    : 24
         , "medal"  : false
         , "comic": {"pages": 15}
         }
@@ -511,6 +519,17 @@
         , "ext"    : "jpg"
         , "medal"  : false
         , "framed" : true
+        }
+    ,   { "id"     : "the_wreaths"
+        , "name"   : "How The Wreaths Stole Tankmas"
+        , "authors": ["mrshmoods:art", "connorgrail:music", "voicesbycorey:va"]
+        , "day"    : 24
+        , "medal"  : false
+        , "comic": {
+            "pages"    : 14
+        ,   "audioPath": "audio.mp3"
+        ,   "dataPath" : "data.json"
+        }
         }
     ]
 ,   "events":
