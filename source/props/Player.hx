@@ -11,7 +11,6 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.math.FlxVector;
 import flixel.text.FlxBitmapText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxDestroyUtil;
@@ -146,9 +145,8 @@ class Player extends flixel.FlxSprite
         last.put();
         // BOB SHIT END
         
-        var v:FlxVector = velocity;
-        if (v.lengthSquared > MAX_SPEED * MAX_SPEED)
-            v.length = MAX_SPEED;
+        if (velocity.lengthSquared > MAX_SPEED * MAX_SPEED)
+            velocity.length = MAX_SPEED;
         
         hitbox.update(elapsed);
         final marginX = (hitbox.width - width) / 2 + hitboxOffset.x;
@@ -351,7 +349,7 @@ class Player extends flixel.FlxSprite
             if (targetPos == null)
                 targetPos = FlxPoint.get();
             targetPos.copyFrom(newPos);
-            movePath = map.findPath(start, end, false, WIDE);
+            movePath = map.findPath(start, end, NONE);
             // remove the first node, this is a lazy fix to prevent them from
             // sometimes going backwards at the start of a new path
             if (movePath != null)
@@ -372,7 +370,7 @@ class Player extends flixel.FlxSprite
     {
         final map = (cast FlxG.state:RoomState).geom;
         final start = FlxPoint.get(x, y);
-        final path = map.findPath(start, end, false, WIDE);
+        final path = map.findPath(start, end, NONE);
         return if (path == null) -1 else path.length;
     }
     

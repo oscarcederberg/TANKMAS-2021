@@ -8,7 +8,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxVector;
+import flixel.math.FlxPoint;
 
 class CafeTable extends FlxSpriteGroup
 {
@@ -17,9 +17,9 @@ class CafeTable extends FlxSpriteGroup
     
     var placemats = new FlxTypedGroup<Placemat>();
     
-    var center:FlxVector;
+    var center:FlxPoint;
     
-    public function new (x, y, center:FlxVector)
+    public function new (x, y, center:FlxPoint)
     {
         this.center = center;
         super(x, y);
@@ -55,7 +55,7 @@ class CafeTable extends FlxSpriteGroup
     
     public function getClosestNode(path:OgmoPath)
     {
-        var v = FlxVector.get();
+        var v = FlxPoint.get();
         var shortestSquared = Math.POSITIVE_INFINITY;
         for (node in path)
         {
@@ -89,7 +89,7 @@ class CafeTable extends FlxSpriteGroup
     
     static public function fromDecal(bottom:OgmoDecal)
     {
-        var center = FlxVector.get
+        var center = FlxPoint.get
             ( bottom.x + bottom.width - (bottom.frameWidth) / 2
             , bottom.y + bottom.height - (bottom.frameHeight) / 2
             );
@@ -122,7 +122,7 @@ class CafeTable extends FlxSpriteGroup
                 b = placemat.y + placemat.height;
         }
         
-        var table = new CafeTable(l, t, FlxVector.get((l + r) / 2, (t + b) / 2));
+        var table = new CafeTable(l, t, FlxPoint.get((l + r) / 2, (t + b) / 2));
         for (placemat in list)
             table.addPlacemat(placemat);
         

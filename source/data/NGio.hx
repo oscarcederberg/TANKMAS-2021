@@ -10,6 +10,7 @@ import io.newgrounds.components.ScoreBoardComponent.Period;
 import io.newgrounds.objects.Error;
 import io.newgrounds.objects.events.Response;
 import io.newgrounds.objects.events.Result.GetDateTimeResult;
+import io.newgrounds.objects.events.ResultType;
 
 import openfl.display.Stage;
 
@@ -66,25 +67,30 @@ class NGio
 		
 		ngDataLoaded.addOnce(callback);
 		
-		function onSessionFail(e:Error)
+		function checkSessionCallback(result:ResultType)
 		{
-			log("session failed:" + e.toString());
-			ngDataLoaded.remove(callback);
-			callback();
+			switch(result)
+			{
+				case Success: onNGLogin();
+				case Error(error):
+					
+					log("session failed:" + error);
+					ngDataLoaded.remove(callback);
+					callback();
+			}
 		}
 		
 		if (APIStuff.DebugSession != null)
 			lastSessionId = APIStuff.DebugSession;
 		
 		logDebug('connecting to newgrounds, debug:$DEBUG_SESSION session:' + lastSessionId);
-		NG.createAndCheckSession(APIStuff.APIID, DEBUG_SESSION, lastSessionId, onSessionFail);
-		NG.core.initEncryption(APIStuff.EncKey);
-		NG.core.onLogin.add(onNGLogin);
+		NG.createAndCheckSession(APIStuff.APIID, DEBUG_SESSION, lastSessionId, checkSessionCallback);
+		NG.core.setupEncryption(APIStuff.EncKey, RC4);
 		#if NG_VERBOSE NG.core.verbose = true; #end
 		logEventOnce(view);
 		
 		// Load scoreboards even if not logging in
-		NG.core.requestScoreBoards(onScoreboardsRequested);
+		NG.core.scoreBoards.loadList(onScoreboardsRequested);
 		
 		if (!NG.core.attemptingLogin)
 		{
@@ -123,7 +129,7 @@ class NGio
 			.send();
 	}
 	
-	static public function startManualSession(callback:ConnectResult->Void, onPending:((Bool)->Void)->Void):Void
+	static public function startManualSession(callback:(ResultType)->Void, passportHandler:((Bool)->Void)->Void):Void
 	{
 		if (NG.core == null)
 			throw "call NGio.attemptLogin first";
@@ -136,12 +142,10 @@ class NGio
 				NG.core.cancelLoginRequest();
 		}
 		
-		NG.core.requestLogin(
-			callback.bind(Succeeded),
-			onPending.bind(onClickDecide),
-			(error)->callback(Failed(error)),
-			callback.bind(Cancelled)
-		);
+		NG.core.requestLogin
+			( callback
+			, (_)->passportHandler(onClickDecide)
+			);
 	}
 	
 	static function onNGLogin():Void
@@ -163,21 +167,32 @@ class NGio
 	
 	static public function checkNgDate(onComplete:Void->Void):Void
 	{
-		NG.core.calls.gateway.getDatetime()
-		.addDataHandler(
-			function(response)
+		NG.core.requestServerTime
+		(
+			function(result)
 			{
-				if (response.success && response.result.success) 
-					ngDate = Date.fromString(response.result.data.dateTime.substring(0, 10));
+				switch(result)
+				{
+					case Success(date) : ngDate = date;
+					case Error  (error): throw error;
+				}
+				onComplete();
 			}
-		).addSuccessHandler(onComplete)
-		.addErrorHandler((_)->onComplete())
-		.send();
+		, false // useLocalTime
+		);
 	}
 	
 	// --- SCOREBOARDS
-	static function onScoreboardsRequested():Void
+	static function onScoreboardsRequested(result:ResultType):Void
 	{
+		switch(result)
+		{
+			case Success: // nothing
+			case Error(error):
+				log('Error loading scoreboard: $error');
+				return;
+		}
+		
 		for (board in NG.core.scoreBoards)
 		{
 			boardsByName[board.name] = board.id;
@@ -260,8 +275,16 @@ class NGio
 	}
 	
 	// --- MEDALS
-	static function onMedalsRequested():Void
+	static function onMedalsRequested(result:ResultType):Void
 	{
+		switch(result)
+		{
+			case Success: // nothing
+			case Error(error):
+				log('Error loading medals: $error');
+				return;
+		}
+		
 		var numMedals = 0;
 		var numMedalsLocked = 0;
 		for (medal in NG.core.medals)
@@ -362,7 +385,7 @@ class NGio
 	 * The user was directed to 2020, mid game, check to see if the data shows up.
 	 * @param callback called when it has successfully loaded medal data, or gave.
 	 */
-	static public function waitFor2020SaveData(callback:(Bool)->Void)
+	static public function waitFor2020SaveData(callback:(ResultType)->Void)
 	{
 		// Checks every seconds for 10 seconds
 		// The game (and the timers) should pause when
@@ -381,74 +404,79 @@ class NGio
 				}
 				
 				if (timer.finished)
-					callback(false);
+					callback(Error("Timed out"));
 			}
 		, 10 // loops
 		);
 	}
 	
-	static public function fetch2020Medals(sessionId:String, callback:(Bool)->Void)
+	static public function fetch2020Medals(sessionId:String, callback:(ResultType)->Void)
 	{
 		if (!NG.core.loggedIn)// can't use == false becuase there's a bug where it's null
 		{
-			log('Error fetching 2020 medals: not logged in');
 			// Save.deleteSave2020();
-			callback(false);
+			callback(Error('Error fetching 2020 medals: not logged in'));
 			return;
 		}
 		
 		Save.verifySave2020(NG.core.user.id);
 		
 		var ng2020:NG = null;
-		var loggedIn:()->Void = null;
 		
-		function callbackAndDestroy(?error:String)
+		inline function errorCallback(msg:String)
 		{
-			if (error != null)
-				log('Error fetching 2020 medals: $error');
-			
-			ng2020.onLogin.remove(loggedIn);
-			callback(error == null);
+			callback(Error(msg));
 		}
 		
-		loggedIn = function ()
+		function loginCallback(result:ResultType)
 		{
+			switch (result)
+			{
+				case Success: // nothing
+				case Error(_):
+					
+					callback(result);
+					return;
+			}
+			
 			if (NG.core.user.name != ng2020.user.name)
 			{
-				callbackAndDestroy
+				errorCallback
 					( 'Invalid user:${ng2020.user.name}@${ng2020.user.id} '
 					+ 'expected:${NG.core.user.name}@${NG.core.user.id}'
 					);
+				
 				return;
 			}
 			
 			logVerbose("2020 session successful, loading medals");
-			ng2020.requestMedals
+			ng2020.medals.loadList
 			(
-				function onSucceed()
+				function medalCallback(medalResult)
 				{
-					var daysSeen = new BitArray();
-					var unlockedList = new Array<Int>();
-					for (id=>medal in ng2020.medals)
+					if (medalResult == Success)
 					{
-						if (medal.unlocked && id - DAY_MEDAL_0_2020 < 32)
-							daysSeen[id - DAY_MEDAL_0_2020] = true;
-						else
-							unlockedList.push(id);
+						var daysSeen = new BitArray();
+						var unlockedList = new Array<Int>();
+						for (id=>medal in ng2020.medals)
+						{
+							if (medal.unlocked && id - DAY_MEDAL_0_2020 < 32)
+								daysSeen[id - DAY_MEDAL_0_2020] = true;
+							else
+								unlockedList.push(id);
+						}
+						log('2020 medals loaded, days seen: $daysSeen, medals:$unlockedList');
+						Save.setUnlockedMedals2020(unlockedList);
+						Save.setDaysSeen2020(daysSeen);
+						Save.setNgioUserId2020(ng2020.user.id);
 					}
-					log('2020 medals loaded, days seen: $daysSeen, medals:$unlockedList');
-					Save.setUnlockedMedals2020(unlockedList);
-					Save.setDaysSeen2020(daysSeen);
-					Save.setNgioUserId2020(ng2020.user.id);
 					
-					callbackAndDestroy();
-				},
-				(e)->callbackAndDestroy(e.message)
+					callback(medalResult);
+				}
 			);
 		}
 		
-		ng2020 = new NG(APIStuff.APIID_2020, sessionId, (e)->callbackAndDestroy(e.message));
-		ng2020.onLogin.add(loggedIn);
+		ng2020 = new NG(APIStuff.APIID_2020, sessionId, loginCallback);
 	}
 	#end
 	

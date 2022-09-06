@@ -49,10 +49,10 @@ class Skins
         
         if (NGio.isLoggedIn)
         {
-            if (NG.core.medals != null)
+            if (NG.core.medals.state == Loaded)
                 medalsLoaded();
             else
-                NG.core.onMedalsLoaded.add(medalsLoaded);
+                NG.core.medals.onLoaded.add(medalsLoaded);
         }
     }
     

@@ -1,7 +1,7 @@
 package utils;
 
 import flixel.FlxSprite;
-import flixel.math.FlxVector;
+import flixel.math.FlxPoint;
 
 class DebugLine extends FlxSprite
 {
@@ -53,7 +53,7 @@ class DebugLine extends FlxSprite
     
     public function setEnd(x2:Float, y2:Float)
     {
-        var line = FlxVector.get(x2 - x, y2 - y);
+        var line = FlxPoint.get(x2 - x, y2 - y);
         setGraphicSize(Std.int(Math.max(line.length, 1)), Std.int(thickness));
         @:bypassAccessor this.x2 = x2;
         @:bypassAccessor this.y2 = y2;

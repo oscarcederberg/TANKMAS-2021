@@ -14,7 +14,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
-import flixel.util.FlxPath;
+import flixel.path.FlxPath;
 
 typedef EntityTypeMap = Map<String, (OgmoEntityData<Dynamic>)->FlxObject>;
 
@@ -84,7 +84,6 @@ class OgmoTilemap extends FlxTilemap
             , 1
             , 1
             );
-        this.useScaleHack = false;
     }
 }
 
@@ -388,7 +387,7 @@ abstract OgmoEntityData<T>(RawOgmoEntityData<T>) from RawOgmoEntityData<T> to Ra
         if (this.originY != 0)
             sprite.offset.y = this.originY;
         if (this.flippedX == true)
-            sprite.facing = (sprite.facing == FlxObject.LEFT) ? FlxObject.RIGHT : FlxObject.LEFT;
+            sprite.facing = (sprite.facing == LEFT) ? RIGHT : LEFT;
         
     }
 }

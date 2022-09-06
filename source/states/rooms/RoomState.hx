@@ -26,7 +26,6 @@ import flixel.group.FlxGroup;
 import flixel.text.FlxBitmapText;
 import flixel.tile.FlxTilemap;
 import flixel.math.FlxPoint;
-import flixel.math.FlxVector;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
@@ -754,7 +753,7 @@ class RoomState extends OgmoState
     inline static var KISS_DISTANCE_SQR = KISS_DISTANCE * KISS_DISTANCE;
     function checkKisses()
     {
-        var dis = FlxVector.get();
+        var dis = FlxPoint.get();
         // check player kisses
         if (player.justEmoted)
         {

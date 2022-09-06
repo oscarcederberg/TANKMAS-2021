@@ -65,10 +65,8 @@ class Player extends FlxSprite {
 				newAngle = 0;
 			}
 
-			velocity.set(SPEED, 0);
-			velocity.rotate(FlxPoint.weak(0, 0), newAngle);
-			acceleration.set(SPEED, 0);
-			acceleration.rotate(FlxPoint.weak(0, 0), newAngle);
+			velocity.setPolarDegrees(SPEED, newAngle);
+			acceleration.setPolarDegrees(SPEED, newAngle);
 		}
 		else
 		{

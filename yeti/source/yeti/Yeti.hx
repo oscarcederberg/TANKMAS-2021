@@ -4,7 +4,6 @@ import flixel.util.FlxSignal;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxVelocity;
-import flixel.math.FlxVector;
 import flixel.addons.display.FlxNestedSprite;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
@@ -71,7 +70,7 @@ class Yeti extends FlxSprite
 			target = playerRef.getMidpoint();
 		}
 
-		var toPlyrVec:FlxVector = FlxVector.get(target.x - (x + (width / 2)), target.y - (y + (height / 2)));
+		var toPlyrVec = FlxPoint.get(target.x - (x + (width / 2)), target.y - (y + (height / 2)));
 		FlxVelocity.accelerateFromAngle(this, toPlyrVec.radians, acl, maxAcl, false);
 		toPlyrVec.put();
 	}

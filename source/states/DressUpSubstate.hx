@@ -305,17 +305,16 @@ class DressUpSubstate extends flixel.FlxSubState
                 FlxG.openURL(url);
                 prompt.setupTextOnly("Checking for Tankmas 2020 data, be sure to load the bedroom");
                 NGio.waitFor2020SaveData
-                (   (success)->//callback
+                (   (result)->//callback
                     {
-                        if (success)
+                        switch (result)
                         {
-                            Skins.checkUnlocks();
-                            resetSkinsList();
-                            prompt.setupOk("Load Successful, Enjoy!", remove.bind(prompt));
-                        }
-                        else
-                        {
-                            prompt.setupOk("Could not find 2020 save data, please try again", remove.bind(prompt));
+                            case Success:
+                                Skins.checkUnlocks();
+                                resetSkinsList();
+                                prompt.setupOk("Load Successful, Enjoy!", remove.bind(prompt));
+                            case Error(error):
+                                prompt.setupOk("Could not find 2020 save data, please try again", remove.bind(prompt));
                         }
                     }
                 );

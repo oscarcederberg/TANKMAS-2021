@@ -21,6 +21,7 @@ import flixel.graphics.frames.FlxBitmapFont;
 import openfl.Assets;
 
 import io.newgrounds.NG;
+import io.newgrounds.objects.events.ResultType;
 
 class BootState extends flixel.FlxState
 {
@@ -95,13 +96,14 @@ class BootState extends flixel.FlxState
         no.x -= no.width;
     }
     
-    function onManualConnectResult(result:ConnectResult):Void
+    function onManualConnectResult(result:ResultType):Void
     {
         switch(result)
         {
-            case Succeeded: onLogin();
-            case Failed(_): showErrorAndBegin();
-            case Cancelled: showMsgAndBegin("Login cancelled\nNot eligible for medals");
+            case Success: onLogin();
+            case Error(error): showMsgAndBegin(error);
+            // case Error(_): showErrorAndBegin();
+            // case Cancelled: showMsgAndBegin("Login cancelled\nNot eligible for medals");
         }
     }
     
@@ -142,7 +144,7 @@ class BootState extends flixel.FlxState
         
         NGio.updateServerVersion(callbacks.add("server version"));
         if (NG.core.loggedIn && NG.core.medals == null)
-            NG.core.onMedalsLoaded.addOnce(callbacks.add("medal list"));
+            NG.core.medals.onLoaded.addOnce(callbacks.add("medal list"));
         
         callbacksSet();
     }
