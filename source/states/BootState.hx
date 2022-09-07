@@ -34,13 +34,10 @@ class BootState extends flixel.FlxState
     var waitTime = 0.0;
     
     var debugFutureEnabled = false;
-    var loadedMedals2020 = #if SHOW_2020_SKINS_WARNING false #else true #end;
     
     override public function create():Void
     {
         super.create();
-        
-        Save.init();
         Content.init(Assets.getText("assets/data/content.json"));
         FlxG.autoPause = false;
         
@@ -62,7 +59,7 @@ class BootState extends flixel.FlxState
         add(versionText);
         
         timeout = new FlxTimer().start(20, showErrorAndBegin);
-        NGio.attemptAutoLogin(Save.getNgioSessionId(), onAutoConnectResult);
+        NGio.attemptAutoLogin(onAutoConnectResult);
     }
     
     function onAutoConnectResult():Void
@@ -109,7 +106,6 @@ class BootState extends flixel.FlxState
     
     function onLogin()
     {
-        Save.setNgioSessionId(NG.core.sessionId);
         beginGame();
     }
     
@@ -137,7 +133,20 @@ class BootState extends flixel.FlxState
         var callbacksSet = callbacks.add("wait");
         Manifest.init(callbacks.add("manifest"));
         Calendar.init(callbacks.add("calendar"));
-        load2020Medals(callbacks.add("2020medals"));
+        final saveCallback = callbacks.add("save");
+        Save.init(function (result)
+        {
+            switch (result)
+            {
+                case SUCCESS: saveCallback();
+                case FAIL(_):
+                    setCenteredNokiaMessage
+                        ( "There was an error loading cloud saves, please reload.\n"
+                        + "Sorry for the inconvenience"
+                        );
+                    setState(FAIL(true));
+            }
+        });
         
         var premierCallback = callbacks.add("moviePremier");
         NGio.checkForMoviePremier((_)->premierCallback());
@@ -147,28 +156,6 @@ class BootState extends flixel.FlxState
             NG.core.medals.onLoaded.addOnce(callbacks.add("medal list"));
         
         callbacksSet();
-    }
-    
-    inline public function load2020Medals(callback:()->Void)
-    {
-        #if LOAD_2020_SKINS
-        var ngioSessionId2020 = Save.getNgioSessionId2020();
-        if (ngioSessionId2020 == null)
-        {
-            callback();
-            return;
-        }
-        NGio.fetch2020Medals(ngioSessionId2020, function (success)
-            {
-                #if SHOW_2020_SKINS_WARNING
-                loadedMedals2020 = success || Save.hasSave2020();
-                #end
-                callback();
-            }
-        );
-        #else
-        callback();
-        #end
     }
     
     inline function showErrorAndBegin(_ = null)
@@ -289,7 +276,7 @@ class BootState extends flixel.FlxState
                         }
                     }
                     
-                    if (state == Checking && (loadedMedals2020 == false || !isWebGl()))
+                    if (state == Checking && !isWebGl())
                     {
                         msg.text = "";
                         state = FAIL(false);
@@ -318,7 +305,7 @@ class BootState extends flixel.FlxState
                                     );
                             }
                             
-                            if (loadedMedals2020 == false)
+                            if (Save.hasSave2020() == false)
                             {
                                 appendSection
                                     ( "Could not find save data for previous years."

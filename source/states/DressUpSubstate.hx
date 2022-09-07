@@ -35,7 +35,9 @@ class DressUpSubstate extends flixel.FlxSubState
     var arrowLeft:Button;
     var arrowRight:Button;
     var ok:OkButton;
+    #if LOAD_2020_SKINS
     var load:LoadButton;
+    #end
     // prevents instant selection
     var wasAReleased = false;
     
@@ -125,11 +127,13 @@ class DressUpSubstate extends flixel.FlxSubState
         ok.y = bottom + BAR_MARGIN;
         ok.scrollFactor.set(0, 0);
         
+        #if LOAD_2020_SKINS
         add(load = new LoadButton(0, 0, load2020));
         load.screenCenter(X);
         load.y = bottom + BAR_MARGIN;
         load.scrollFactor.set(0, 0);
         load.visible = false;
+        #end
         
         hiliteCurrent();
     }
@@ -243,14 +247,14 @@ class DressUpSubstate extends flixel.FlxSubState
             final KEEP_PLAYING = "Keep playing every day to unlock";
             final LOGIN = "Log in to Newgrounds to unlock this";
             descText.text = KEEP_PLAYING;
-            load.visible = false;
+            #if LOAD_2020_SKINS load.visible = false; #end
             if (currentSkin.year == 2020)
             {
                 if (Save.hasSave2020())
                     descText.text = "Play more Tankmas ADVENTure 2020 to unlock this";
                 else
                 {
-                    load.visible = true;
+                    #if LOAD_2020_SKINS load.visible = true; #end
                     descText.text = "No 2020 save data found on this device. Log in to Tankmas ADVENTure 2020 for more skins";
                 }
             }
@@ -264,7 +268,7 @@ class DressUpSubstate extends flixel.FlxSubState
                     default: KEEP_PLAYING;
                 }
             }
-            ok.visible = !load.visible;
+            ok.visible = #if LOAD_2020_SKINS !load.visible #else true #end;
             ok.active = false;
             ok.alpha = 0.5;
         }
@@ -274,11 +278,13 @@ class DressUpSubstate extends flixel.FlxSubState
     
     function select():Void
     {
+        #if LOAD_2020_SKINS
         if (load.visible)
         {
             load2020();
             return;
         }
+        #end
         
         if (currentSkin.unlocked)
         {
@@ -293,6 +299,7 @@ class DressUpSubstate extends flixel.FlxSubState
         super.close();
     }
     
+    #if LOAD_2020_SKINS
     function load2020()
     {
         var prompt = new Prompt();
@@ -330,6 +337,7 @@ class DressUpSubstate extends flixel.FlxSubState
         
         return url.split("default.aspx").join("");
     }
+    #end
 }
 
 class SkinDisplay extends FlxSprite

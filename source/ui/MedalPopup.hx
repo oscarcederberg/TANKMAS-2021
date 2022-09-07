@@ -96,7 +96,11 @@ class MedalPopup extends flixel.group.FlxSpriteGroup
     
     function playDebugAnim():Void
     {
-        onMedalUnlock(NG.core.medals.get(MEDAL_0 + Calendar.day));
+        var medal = NG.core.medals.get(MEDAL_0 + Calendar.day);
+        if (medal == null)
+            throw 'Invalid medalId: ${MEDAL_0 + Calendar.day} for day: ${Calendar.day}';
+        
+        onMedalUnlock(medal);
     }
     
     function playNextAnim():Void {

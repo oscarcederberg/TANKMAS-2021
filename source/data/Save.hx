@@ -3,163 +3,75 @@ package data;
 import data.Content;
 import states.rooms.RoomState;
 
+import io.newgrounds.NG;
+import io.newgrounds.objects.Error;
+import io.newgrounds.objects.events.ResultType;
+import io.newgrounds.utils.MedalList;
+
 import utils.Log;
 import utils.BitArray;
+import utils.MultiCallback;
 
 import flixel.FlxG;
 import flixel.util.FlxSave;
 
 import haxe.Int64;
+import haxe.Json;
 import haxe.PosInfos;
 
 class Save
 {
     static var emptyData:SaveData = cast {}
     
+    static var save:FlxSave;
     static var data:SaveData;
+    static var data2020:SaveData2020;
+    static var medals2020:ExternalMedalList;
     static public var showName(get, set):Bool;
     
-    static public function init()
+    static public function init(callback:(ResultType<String>)->Void)
     {
         #if DISABLE_SAVE
             data = emptyData;
         #else
-            if (FlxG.save.bind("advent2021", "GeoKureli"))
-                data = FlxG.save.data;
-            else
-                data = emptyData;
+            NG.core.saveSlots.loadAllFiles
+            (
+                function (result)
+                {
+                    switch (result)
+                    {
+                        case SUCCESS: onCloudSavesLoaded(callback);
+                        case FAIL(error): callback(result);
+                    }
+                }
+            );
         #end
-        
-        #if LOAD_2020_SKINS
-        load2020SaveData(false);
-        #end
-        
-        var clearSave = #if CLEAR_SAVE true #else false #end;
-        
-        // set default values
-        var newData = false;
-        if (clearSave || data.volume == null)
+    }
+    
+    static function onCloudSavesLoaded(callback:(ResultType<String>)->Void)
+    {
+        #if CLEAR_SAVE
+        createInitialData();
+        flush();
+        #else
+        if (NG.core.saveSlots[1].isEmpty())
         {
-            data.volume = FlxG.sound.volume = 0.5;
-            newData = true;
-        }
-        else
-            FlxG.sound.volume = data.volume;
-        
-        if (clearSave || data.mute == null)
-        {
-            data.mute = FlxG.sound.muted;
-            newData = true;
-        }
-        else
-            FlxG.sound.muted = data.mute;
-        
-        if (clearSave || data.presents == null)
-        {
-            data.presents = new BitArray();
-            newData = true;
-        }
-        else if (BitArray.isOldFormat(data.presents))
-        {
-            data.presents = BitArray.fromOldFormat(cast data.presents);
-            newData = true;
-        }
-        log("presents: " + data.presents);
-        
-        if (clearSave || data.days == null)
-        {
-            data.days = new BitArray();
-            newData = true;
-        }
-        else if (BitArray.isOldFormat(data.days))
-        {
-            data.days = BitArray.fromOldFormat(cast data.days);
-            newData = true;
-        }
-        log("seen days: " + data.days);
-        
-        if (clearSave || data.days2020 == null)
-        {
-            deleteSave2020(false);
-            newData = true;
-        }
-        log("seen days 2020: " + data.days2020);
-        log("medals unlocked 2020: " + data.medalsUnlocked2020);
-        log("medals user id 2020: " + data.ngioUserId2020);
-        
-        //PLURAL: seen skins
-        if (clearSave || data.skins == null)
-        {
-            data.skins = new BitArray();
-            newData = true;
-        }
-        else if (BitArray.isOldFormat(data.skins))
-        {
-            data.skins = BitArray.fromOldFormat(cast data.skins);
-            newData = true;
-        }
-        log("seen skins: " + data.skins);
-        
-        //SINGULAR: current skin
-        if (clearSave || data.skin == null)
-        {
-            data.skin = 0;
-            newData = true;
-        }
-        log("skin: " + data.skin);
-        
-        #if FORGET_INSTRUMENT data.instrument = null; #end
-        if (clearSave || data.instrument == null)
-        {
-            data.instrument = -1;
-            newData = true;
-        }
-        log("instrument: " + data.instrument);
-        
-        #if FORGET_INSTRUMENT data.seenInstruments = null; #end
-        if (clearSave || data.seenInstruments == null)
-        {
-            data.seenInstruments = new BitArray();
-            newData = true;
-        }
-        else if (BitArray.isOldFormat(data.seenInstruments))
-        {
-            data.seenInstruments = BitArray.fromOldFormat(cast data.seenInstruments);
-            newData = true;
-        }
-        log("instruments seen: " + data.seenInstruments);
-        
-        if (clearSave)
-            data.ngioSessionId = null;
-        log("saved session: " + data.ngioSessionId);
-        
-        if (clearSave || data.showName == null)
-        {
-            data.showName = false;
-            newData = true;
-        }
-        log("saved session: " + data.ngioSessionId);
-        
-        log("saved order: " + (data.cafeOrder == null ? "random" : data.cafeOrder));
-        
-        if (clearSave || data.seenYeti == null)
-        {
-            data.seenYeti = false;
-            newData = true;
-        }
-        
-        if (data.instrument < -1 && data.seenInstruments.countTrue() > 0)
-        {
-            // fix an old glitch where i deleted instrument save
-            var i = 0;
-            while (!data.seenInstruments[i] && i < 32)
-                i++;
-            data.instrument = i;
-            newData = true;
-        }
-        
-        if (newData)
+            createInitialData();
+            mergeLocalSave();
             flush();
+        }
+        else
+            data = Json.parse(NG.core.saveSlots[1].contents);
+        #end
+        
+        log("presents: " + data.presents);
+        log("seen days: " + data.days);
+        log("seen skins: " + data.skins);
+        log("skin: " + data.skin);
+        log("instrument: " + data.instrument);
+        log("instruments seen: " + data.seenInstruments);
+        log("saved session: " + data.showName);
+        log("saved order: " + (data.cafeOrder == null ? "random" : data.cafeOrder));
         
         function setInitialInstrument()
         {
@@ -172,64 +84,107 @@ class Save
             setInitialInstrument();
         else
             Content.onInit.addOnce(setInitialInstrument);
-    }
-    
-    #if LOAD_2020_SKINS
-    @:allow(data.NGio)
-    static function load2020SaveData(clearCache = false)
-    {
-        #if debug
-        if (APIStuff.DEBUG_SESSON_2020 != null)
-        {
-            data.ngioSessionId2020 = APIStuff.DEBUG_SESSON_2020;
-            flush();
-            return;
-        }
+        
+        #if LOAD_2020_SKINS
+        load2020Data(callback);
+        #else
+        callback(SUCCESS);
         #end
-        
-        // bypass openfl's save cache via hacking
-        if (clearCache)
-        {
-            // delete saved session
-            if (data.ngioSessionId2020 != null)
-            {
-                data.ngioSessionId2020 = null;
-                flush();
-            }
-            clearSharedObjectCache("advent2020", "GeoKureli");
-        }
-        
-        // Load last years save for session id
-        var save2020 = new FlxSave();
-        if (save2020.bind("advent2020", "GeoKureli"))
-        {
-            var data2020:SaveData2020 = save2020.data;
-            log("2020 data found: " + data2020);
-            if (data2020.ngioSessionId != null)
-            {
-                data.ngioSessionId2020 = data2020.ngioSessionId;
-                flush();
-            }
-            
-            if (data.skin == null && data2020.skin != null)
-            {
-                log("using 2020 skin:" + data2020.skin);
-                data.skin = data2020.skin;
-            }
-        }
     }
     
-    static function clearSharedObjectCache(name:String, path:String)
+    static function createInitialData()
     {
-        @:privateAccess
-        openfl.net.SharedObject.__sharedObjects.remove('$path/$name');
+        data = cast {};
+        data.presents        = new BitArray();
+        data.days            = new BitArray();
+        data.skins           = new BitArray();
+        data.seenInstruments = new BitArray();
+        data.skin            = 0;
+        data.instrument      = -1;
+        data.showName        = false;
+        data.seenYeti        = false;
+        data.cafeOrder       = null;
     }
-    #end
     
-    static function flush()
+    static function mergeLocalSave()
+    {
+        var save = new FlxSave();
+        if (save.bind("advent2021", "GeoKureli") && save.isEmpty() == false)
+        {
+            for (field in Reflect.fields(save.data))
+                Reflect.setField(data, field, Reflect.field(save.data, field));
+            
+            save.erase();
+        }
+    }
+    
+    static function parseLocalSave(data:SaveData)
+    {
+        if (BitArray.isOldFormat(data.presents))
+            data.presents = BitArray.fromOldFormat(cast data.presents);
+            
+        if (BitArray.isOldFormat(data.days))
+            data.days = BitArray.fromOldFormat(cast data.days);
+        
+        if (BitArray.isOldFormat(data.skins))
+            data.skins = BitArray.fromOldFormat(cast data.skins);
+        
+        if (BitArray.isOldFormat(data.seenInstruments))
+            data.seenInstruments = BitArray.fromOldFormat(cast data.seenInstruments);
+        
+        if (data.instrument < -1 && data.seenInstruments.countTrue() > 0)
+        {
+            // fix an old glitch where i deleted instrument save
+            var i = 0;
+            while (!data.seenInstruments[i] && i < 32)
+                i++;
+            
+            data.instrument = i;
+        }
+    }
+    
+   static function load2020Data(callback:(ResultType<String>)->Void)
+    {
+        var callbacks = new ResultMultiCallback<String>(callback, "2020data");
+        
+        var advent2020 = NG.core.externalApps.add(APIStuff.APIID_2020);
+        var medalCallback = callbacks.add("medals");
+        advent2020.medals.loadList((result)->
+            {
+                switch (result)
+                {
+                    case SUCCESS:
+                        medalCallback(SUCCESS); 
+                        medals2020 = advent2020.medals;
+                    case FAIL(error):
+                        medalCallback(FAIL(error.toString()));
+                }
+            }
+        );
+        
+        var saveCallback = callbacks.add("saves");
+        advent2020.saveSlots.loadAllFiles
+        (
+            function (result)
+            {
+                switch (result)
+                {
+                    case FAIL(_):
+                    case SUCCESS:
+                        var slot = advent2020.saveSlots[1];
+                        if (slot.isEmpty() == false)
+                            data2020 = Json.parse(slot.contents);
+                }
+                
+                saveCallback(result);
+            }
+        );
+    }
+    
+    static function flush(?callback:(ResultType<Error>)->Void)
     {
         if (data != emptyData)
-            FlxG.save.flush();
+            NG.core.saveSlots[1].save(Json.stringify(data), callback);
     }
     
     static public function resetPresents()
@@ -388,26 +343,6 @@ class Save
         return data.seenInstruments[Content.instruments[type].index];
     }
     
-    static public function setNgioSessionId(id:String)
-    {
-        #if !(NG_LURKER)
-        if (data.ngioSessionId != id)
-        {
-            data.ngioSessionId = id;
-            flush();
-        }
-        #end
-    }
-    
-    static public function getNgioSessionId():Null<String>
-    {
-        #if NG_LURKER
-        return null;
-        #else
-        return data.ngioSessionId;
-        #end
-    }
-    
     inline static function get_showName() return data.showName;
     static function set_showName(value:Bool)
     {
@@ -438,75 +373,33 @@ class Save
     
     /* --- --- --- --- 2020 --- --- --- --- */
     
-    static public function getNgioSessionId2020():Null<String>
-    {
-        return data.ngioSessionId2020;
-    }
-    
-    @:allow(data.NGio)
-    static function setUnlockedMedals2020(ids:Array<Int>)
-    {
-        data.medalsUnlocked2020 = ids;
-        flush();
-    }
-    
-    @:allow(data.NGio)
-    static function setDaysSeen2020(bits:BitArray)
-    {
-        if (data.days2020 != bits)
-        {
-            data.days2020 = bits;
-            flush();
-        }
-    }
-    
-    @:allow(data.NGio)
-    static function setNgioUserId2020(id:Int)
-    {
-        if (data.ngioUserId2020 != id)
-        {
-            data.ngioUserId2020 = id;
-            flush();
-        }
-    }
-    
-    @:allow(data.NGio)
-    static function verifySave2020(id:Int)
-    {
-        if (data.ngioUserId2020 != id || id == -1)
-            deleteSave2020();
-    }
-    
-    @:allow(data.NGio)
-    static function deleteSave2020(flushNow = true)
-    {
-        data.ngioUserId2020 = -1;
-        data.days2020 = new BitArray();
-        data.medalsUnlocked2020 = [];
-        if (flushNow)
-            flush();
-    }
-    
     static public function hasSave2020()
     {
-        return data.days2020.countTrue() > 0
-            || data.medalsUnlocked2020.length > 0;
+        return data2020 != null;
     }
     
     static public function hasMedal2020(id:Int)
     {
-        return data.medalsUnlocked2020.indexOf(id) != -1;
+        if (medals2020 == null)
+            return false;
+        
+        return medals2020[id].unlocked;
     }
     
     static public function hasSeenDay2020(day:Int)
     {
+        if (data2020 == null)
+            return false;
         // zero based
-        return data.days2020[day - 1];
+        return data2020.days[day - 1];
     }
     
     static public function countDaysSeen2020()
     {
-        return data.days2020.countTrue();
+        if (data2020 == null)
+            return 0;
+        
+        return data2020.days.countTrue();
     }
     
     inline static function log(msg, ?info:PosInfos) Log.save(msg, info);
@@ -520,17 +413,10 @@ typedef SaveData2020 =
     var skin:Int;
     var instrument:Int;
     var seenInstruments:BitArray;
-    var ngioSessionId:String;
-    var mute:Bool;
-    var volume:Float;
 }
 
 typedef SaveData = SaveData2020 &
 {
-    var ngioSessionId2020:String;
-    var ngioUserId2020:Int;
-    var days2020:BitArray;
-    var medalsUnlocked2020:Array<Int>;
     var showName:Bool;
     var cafeOrder:Order;
     var seenYeti:Bool;

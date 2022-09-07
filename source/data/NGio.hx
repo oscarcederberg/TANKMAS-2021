@@ -51,7 +51,7 @@ class NGio
 	static var boardsByName(default, null) = new Map<String, Int>();
 	static var loggedEvents = new Array<NgEvent>();
 	
-	static public function attemptAutoLogin(lastSessionId:Null<String>, callback:Void->Void) {
+	static public function attemptAutoLogin(callback:Void->Void) {
 		
 		#if NG_BYPASS_LOGIN
 		NG.create(APIStuff.APIID, null, DEBUG_SESSION);
@@ -72,7 +72,7 @@ class NGio
 		{
 			switch(result)
 			{
-				case SUCCESS: onNGLogin();
+				case SUCCESS: // nothing
 				case FAIL(error):
 					
 					log("session failed:" + error);
@@ -81,12 +81,20 @@ class NGio
 			}
 		}
 		
+		var lastSessionId:String = null;
 		if (APIStuff.DebugSession != null)
+		{
 			lastSessionId = APIStuff.DebugSession;
+		}
+		else if (FlxG.save.data.ngioSessionId != null)
+		{
+			lastSessionId = FlxG.save.data.ngioSessionId;
+		}
 		
 		logDebug('connecting to newgrounds, debug:$DEBUG_SESSION session:' + lastSessionId);
 		NG.createAndCheckSession(APIStuff.APIID, DEBUG_SESSION, lastSessionId, checkSessionCallback);
 		NG.core.setupEncryption(APIStuff.EncKey, RC4);
+		NG.core.onLogin.add(onNGLogin);
 		#if NG_VERBOSE NG.core.verbose = true; #end
 		logEventOnce(view);
 		
@@ -154,6 +162,11 @@ class NGio
 		isLoggedIn = true;
 		userName = NG.core.user.name;
 		logDebug('logged in! user:${NG.core.user.name}');
+		
+		// Save sessionId
+		FlxG.save.data.ngioSessionId = NG.core.sessionId;
+		FlxG.save.flush();
+		
 		NG.core.medals.loadList(onMedalsRequested);
 		
 		
@@ -380,110 +393,6 @@ class NGio
 				)
 			.send();
 	}
-	
-	#if LOAD_2020_SKINS
-	/**
-	 * The user was directed to 2020, mid game, check to see if the data shows up.
-	 * @param callback called when it has successfully loaded medal data, or gave.
-	 */
-	static public function waitFor2020SaveData(callback:(LoginResultType)->Void)
-	{
-		// Checks every seconds for 10 seconds
-		// The game (and the timers) should pause when
-		// the link opens, and resume when they come back
-		new FlxTimer().start
-		( 1.0
-		,   (timer)->
-			{
-				Save.load2020SaveData(true);
-				var sessionId = Save.getNgioSessionId2020();
-				if (sessionId != null)
-				{
-					timer.cancel();
-					fetch2020Medals(sessionId, callback);
-					return;
-				}
-				
-				if (timer.finished)
-					callback(FAIL(ERROR("Timed out")));
-			}
-		, 10 // loops
-		);
-	}
-	
-	static public function fetch2020Medals(sessionId:String, callback:(LoginResultType)->Void)
-	{
-		if (!NG.core.loggedIn)// can't use == false becuase there's a bug where it's null
-		{
-			// Save.deleteSave2020();
-			callback(FAIL(ERROR('Error fetching 2020 medals: not logged in')));
-			return;
-		}
-		
-		Save.verifySave2020(NG.core.user.id);
-		
-		var ng2020:NG = null;
-		
-		inline function errorCallback(msg:String)
-		{
-			callback(FAIL(ERROR(msg)));
-		}
-		
-		function loginCallback(result:LoginResultType)
-		{
-			switch (result)
-			{
-				case SUCCESS: // nothing
-				case FAIL(error):
-					
-					callback(result);
-					return;
-			}
-			
-			if (NG.core.user.name != ng2020.user.name)
-			{
-				errorCallback
-					( 'Invalid user:${ng2020.user.name}@${ng2020.user.id} '
-					+ 'expected:${NG.core.user.name}@${NG.core.user.id}'
-					);
-				
-				return;
-			}
-			
-			logVerbose("2020 session successful, loading medals");
-			ng2020.medals.loadList
-			(
-				function medalCallback(medalResult)
-				{
-					if (medalResult == SUCCESS)
-					{
-						var daysSeen = new BitArray();
-						var unlockedList = new Array<Int>();
-						for (id=>medal in ng2020.medals)
-						{
-							if (medal.unlocked && id - DAY_MEDAL_0_2020 < 32)
-								daysSeen[id - DAY_MEDAL_0_2020] = true;
-							else
-								unlockedList.push(id);
-						}
-						log('2020 medals loaded, days seen: $daysSeen, medals:$unlockedList');
-						Save.setUnlockedMedals2020(unlockedList);
-						Save.setDaysSeen2020(daysSeen);
-						Save.setNgioUserId2020(ng2020.user.id);
-					}
-					
-					switch(medalResult)
-					{
-						case SUCCESS    : callback(SUCCESS);
-						case FAIL(error): callback(FAIL(ERROR(error.toString())));
-					}
-				}
-			);
-		}
-		
-		ng2020 = new NG(APIStuff.APIID_2020, sessionId, loginCallback);
-	}
-	#end
 	
 	static public function logEvent(event:NgEvent, once = false, ?pos:PosInfos)
 	{
