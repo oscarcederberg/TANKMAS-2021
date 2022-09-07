@@ -55,7 +55,7 @@ class NGio
 		
 		#if NG_BYPASS_LOGIN
 		NG.create(APIStuff.APIID, null, DEBUG_SESSION);
-		NG.core.requestScoreBoards(onScoreboardsRequested);
+		NG.core.scoreBoards.loadList(onScoreboardsRequested);
 		callback();
 		return;
 		#end
