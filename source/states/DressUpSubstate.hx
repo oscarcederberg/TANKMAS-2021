@@ -309,11 +309,11 @@ class DressUpSubstate extends flixel.FlxSubState
                     {
                         switch (result)
                         {
-                            case Success:
+                            case SUCCESS:
                                 Skins.checkUnlocks();
                                 resetSkinsList();
                                 prompt.setupOk("Load Successful, Enjoy!", remove.bind(prompt));
-                            case Error(error):
+                            case FAIL(error):
                                 prompt.setupOk("Could not find 2020 save data, please try again", remove.bind(prompt));
                         }
                     }

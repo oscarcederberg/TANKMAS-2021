@@ -3,11 +3,12 @@ package data;
 import utils.BitArray;
 
 import io.newgrounds.NG;
+import io.newgrounds.NGLite;
+import io.newgrounds.components.ScoreBoardComponent.Period;
+import io.newgrounds.objects.Error;
 import io.newgrounds.objects.Medal;
 import io.newgrounds.objects.Score;
 import io.newgrounds.objects.ScoreBoard;
-import io.newgrounds.components.ScoreBoardComponent.Period;
-import io.newgrounds.objects.Error;
 import io.newgrounds.objects.events.Response;
 import io.newgrounds.objects.events.Result.GetDateTimeResult;
 import io.newgrounds.objects.events.ResultType;
@@ -67,12 +68,12 @@ class NGio
 		
 		ngDataLoaded.addOnce(callback);
 		
-		function checkSessionCallback(result:ResultType)
+		function checkSessionCallback(result:LoginResultType)
 		{
 			switch(result)
 			{
-				case Success: onNGLogin();
-				case Error(error):
+				case SUCCESS: onNGLogin();
+				case FAIL(error):
 					
 					log("session failed:" + error);
 					ngDataLoaded.remove(callback);
@@ -129,7 +130,7 @@ class NGio
 			.send();
 	}
 	
-	static public function startManualSession(callback:(ResultType)->Void, passportHandler:((Bool)->Void)->Void):Void
+	static public function startManualSession(callback:(LoginResultType)->Void, passportHandler:((Bool)->Void)->Void):Void
 	{
 		if (NG.core == null)
 			throw "call NGio.attemptLogin first";
@@ -153,7 +154,7 @@ class NGio
 		isLoggedIn = true;
 		userName = NG.core.user.name;
 		logDebug('logged in! user:${NG.core.user.name}');
-		NG.core.requestMedals(onMedalsRequested);
+		NG.core.medals.loadList(onMedalsRequested);
 		
 		
 		#if debug
@@ -173,8 +174,8 @@ class NGio
 			{
 				switch(result)
 				{
-					case Success(date) : ngDate = date;
-					case Error  (error): throw error;
+					case SUCCESS(date) : ngDate = date;
+					case FAIL  (error): throw error.toString();
 				}
 				onComplete();
 			}
@@ -183,13 +184,13 @@ class NGio
 	}
 	
 	// --- SCOREBOARDS
-	static function onScoreboardsRequested(result:ResultType):Void
+	static function onScoreboardsRequested(result:ResultType<Error>):Void
 	{
 		switch(result)
 		{
-			case Success: // nothing
-			case Error(error):
-				log('Error loading scoreboard: $error');
+			case SUCCESS: // nothing
+			case FAIL(error):
+				log('ERROR loading scoreboard: $error');
 				return;
 		}
 		
@@ -275,13 +276,13 @@ class NGio
 	}
 	
 	// --- MEDALS
-	static function onMedalsRequested(result:ResultType):Void
+	static function onMedalsRequested(result:ResultType<Error>):Void
 	{
 		switch(result)
 		{
-			case Success: // nothing
-			case Error(error):
-				log('Error loading medals: $error');
+			case SUCCESS: // nothing
+			case FAIL(error):
+				log('ERROR loading medals: $error');
 				return;
 		}
 		
@@ -385,7 +386,7 @@ class NGio
 	 * The user was directed to 2020, mid game, check to see if the data shows up.
 	 * @param callback called when it has successfully loaded medal data, or gave.
 	 */
-	static public function waitFor2020SaveData(callback:(ResultType)->Void)
+	static public function waitFor2020SaveData(callback:(LoginResultType)->Void)
 	{
 		// Checks every seconds for 10 seconds
 		// The game (and the timers) should pause when
@@ -404,18 +405,18 @@ class NGio
 				}
 				
 				if (timer.finished)
-					callback(Error("Timed out"));
+					callback(FAIL(ERROR("Timed out")));
 			}
 		, 10 // loops
 		);
 	}
 	
-	static public function fetch2020Medals(sessionId:String, callback:(ResultType)->Void)
+	static public function fetch2020Medals(sessionId:String, callback:(LoginResultType)->Void)
 	{
 		if (!NG.core.loggedIn)// can't use == false becuase there's a bug where it's null
 		{
 			// Save.deleteSave2020();
-			callback(Error('Error fetching 2020 medals: not logged in'));
+			callback(FAIL(ERROR('Error fetching 2020 medals: not logged in')));
 			return;
 		}
 		
@@ -425,15 +426,15 @@ class NGio
 		
 		inline function errorCallback(msg:String)
 		{
-			callback(Error(msg));
+			callback(FAIL(ERROR(msg)));
 		}
 		
-		function loginCallback(result:ResultType)
+		function loginCallback(result:LoginResultType)
 		{
 			switch (result)
 			{
-				case Success: // nothing
-				case Error(_):
+				case SUCCESS: // nothing
+				case FAIL(error):
 					
 					callback(result);
 					return;
@@ -454,7 +455,7 @@ class NGio
 			(
 				function medalCallback(medalResult)
 				{
-					if (medalResult == Success)
+					if (medalResult == SUCCESS)
 					{
 						var daysSeen = new BitArray();
 						var unlockedList = new Array<Int>();
@@ -471,7 +472,11 @@ class NGio
 						Save.setNgioUserId2020(ng2020.user.id);
 					}
 					
-					callback(medalResult);
+					switch(medalResult)
+					{
+						case SUCCESS    : callback(SUCCESS);
+						case FAIL(error): callback(FAIL(ERROR(error.toString())));
+					}
 				}
 			);
 		}
@@ -517,13 +522,6 @@ class NGio
 	{
 		#if NG_LOG haxe.Log.trace(msg, pos); #end
 	}
-}
-
-enum ConnectResult
-{
-	Succeeded;
-	Failed(error:Error);
-	Cancelled;
 }
 
 enum abstract NgEvent(String) from String to String

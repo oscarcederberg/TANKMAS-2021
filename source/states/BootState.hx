@@ -1,5 +1,6 @@
 package states;
 
+import io.newgrounds.NGLite;
 import data.Save;
 import data.Calendar;
 import data.Content;
@@ -96,14 +97,13 @@ class BootState extends flixel.FlxState
         no.x -= no.width;
     }
     
-    function onManualConnectResult(result:ResultType):Void
+    function onManualConnectResult(result:LoginResultType):Void
     {
         switch(result)
         {
-            case Success: onLogin();
-            case Error(error): showMsgAndBegin(error);
-            // case Error(_): showErrorAndBegin();
-            // case Cancelled: showMsgAndBegin("Login cancelled\nNot eligible for medals");
+            case SUCCESS: onLogin();
+            case FAIL(CANCELLED(_)): showMsgAndBegin("Login cancelled\nNot eligible for medals");
+            case FAIL(ERROR(error)): showMsgAndBegin(error);
         }
     }
     
@@ -197,7 +197,7 @@ class BootState extends flixel.FlxState
             msg.screenCenter(XY);
         }
         
-        if (state.match(Error(false)) && FlxG.keys.justPressed.SPACE)
+        if (state.match(FAIL(false)) && FlxG.keys.justPressed.SPACE)
             onComplete();
         #end
         
@@ -227,7 +227,7 @@ class BootState extends flixel.FlxState
                             + "If you're using brave, try disabling shields for this page\n"
                             + "Sorry for the inconvenience"
                             );
-                        setState(Error(true));
+                        setState(FAIL(true));
                         return;
                     }
                     
@@ -275,12 +275,12 @@ class BootState extends flixel.FlxState
                             // change text when it's loaded
                             startRefreshChecks(()->setCenteredNokiaMessage("IT'S UP, REFRESH THE PAGE! GO GO GO GO!1"));
                             
-                            setState(Error(false));
+                            setState(FAIL(false));
                         }
                         else
                         {
                             setCenteredNokiaMessage("Today's content is almost done, Sorry");
-                            setState(Error(true));
+                            setState(FAIL(true));
                             
                             // change text when it's loaded
                             startRefreshChecks(()->setCenteredNokiaMessage("IT'S UP, REFRESH THE PAGE! GO GO GO GO!1"));
@@ -292,12 +292,12 @@ class BootState extends flixel.FlxState
                     if (state == Checking && (loadedMedals2020 == false || !isWebGl()))
                     {
                         msg.text = "";
-                        state = Error(false);
+                        state = FAIL(false);
                     }
                     
                     switch (state)
                     {
-                        case Error(false):
+                        case FAIL(false):
                         {
                             msg.font = new NokiaFont();
                             
@@ -332,14 +332,14 @@ class BootState extends flixel.FlxState
                         }
                         case Checking:
                         {
-                            setState(Success);
+                            setState(SUCCESS);
                             onComplete();
                         }
                         default: throw "Unexpected state:" + state.getName();
                     }
                     
-                case Success:
-                case Error(_):
+                case SUCCESS:
+                case FAIL(_):
             }
         }
     }
@@ -437,6 +437,6 @@ private enum State
     Initing;
     Waiting;
     Checking;
-    Success;
-    Error(blocking:Bool);
+    SUCCESS;
+    FAIL(blocking:Bool);
 }
