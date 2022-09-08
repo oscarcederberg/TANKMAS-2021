@@ -36,10 +36,16 @@ class DressUpSubstate extends flixel.FlxSubState
     var arrowRight:Button;
     var ok:OkButton;
     #if LOAD_2020_SKINS
-    var load:LoadButton;
+    var play2020:LoadButton;
     #end
     // prevents instant selection
     var wasAReleased = false;
+    
+    /** Currently, only used if a new skin was seen. */
+    var flushOnExit = false;
+    
+    /** Used to diable input */
+    var showingPrompt = false;
     
     var currentSprite(get, never):SkinDisplay;
     inline function get_currentSprite() return sprites.members[current];
@@ -128,11 +134,11 @@ class DressUpSubstate extends flixel.FlxSubState
         ok.scrollFactor.set(0, 0);
         
         #if LOAD_2020_SKINS
-        add(load = new LoadButton(0, 0, load2020));
-        load.screenCenter(X);
-        load.y = bottom + BAR_MARGIN;
-        load.scrollFactor.set(0, 0);
-        load.visible = false;
+        add(play2020 = new LoadButton(0, 0, load2020));
+        play2020.screenCenter(X);
+        play2020.y = bottom + BAR_MARGIN;
+        play2020.scrollFactor.set(0, 0);
+        play2020.visible = false;
         #end
         
         hiliteCurrent();
@@ -185,6 +191,9 @@ class DressUpSubstate extends flixel.FlxSubState
     {
         super.update(elapsed);
         
+        if (showingPrompt)
+            return;
+        
         if (!wasAReleased && Controls.released.A)
             wasAReleased = true;
         
@@ -225,21 +234,25 @@ class DressUpSubstate extends flixel.FlxSubState
     function unhiliteCurrent()
     {
         currentSprite.unseen.visible
-            = currentSkin.unlocked && !Save.hasSeenskin(currentSkin.index);
+            = currentSkin.unlocked && !Save.hasSeenSkin(currentSkin.index);
     }
     
     function hiliteCurrent()
     {
         sprites.x = (current+1) * -SPACING - BAR_MARGIN*2 + (FlxG.width - currentSprite.width) / 2;
         
+        #if LOAD_2020_SKINS play2020.visible = false; #end
         if (currentSkin.unlocked)
         {
             nameText.text = currentSkin.proper;
             descText.text = currentSkin.description;
             ok.active = true;
             ok.alpha = 1;
-            if (currentSprite.unseen.visible && !Calendar.isDebugDay)
-                Save.skinSeen(currentSkin.index);
+            if (Save.hasSeenSkin(currentSkin.index) == false && Calendar.isDebugDay == false)
+            {
+                Save.skinSeen(currentSkin.index, false);
+                flushOnExit = true;
+            }
         }
         else
         {
@@ -247,16 +260,13 @@ class DressUpSubstate extends flixel.FlxSubState
             final KEEP_PLAYING = "Keep playing every day to unlock";
             final LOGIN = "Log in to Newgrounds to unlock this";
             descText.text = KEEP_PLAYING;
-            #if LOAD_2020_SKINS load.visible = false; #end
             if (currentSkin.year == 2020)
             {
+                #if LOAD_2020_SKINS play2020.visible = true; #end
                 if (Save.hasSave2020())
                     descText.text = "Play more Tankmas ADVENTure 2020 to unlock this";
                 else
-                {
-                    #if LOAD_2020_SKINS load.visible = true; #end
-                    descText.text = "No 2020 save data found on this device. Log in to Tankmas ADVENTure 2020 for more skins";
-                }
+                    descText.text = "Play Tankmas ADVENTure 2020 to unlock this";
             }
             else if (currentSkin.unlocksBy != null)
             {
@@ -268,10 +278,10 @@ class DressUpSubstate extends flixel.FlxSubState
                     default: KEEP_PLAYING;
                 }
             }
-            ok.visible = #if LOAD_2020_SKINS !load.visible #else true #end;
             ok.active = false;
             ok.alpha = 0.5;
         }
+        ok.visible = #if LOAD_2020_SKINS !play2020.visible #else true #end;
         nameText.screenCenter(X);
         descText.screenCenter(X);
     }
@@ -279,7 +289,7 @@ class DressUpSubstate extends flixel.FlxSubState
     function select():Void
     {
         #if LOAD_2020_SKINS
-        if (load.visible)
+        if (play2020.visible)
         {
             load2020();
             return;
@@ -296,6 +306,9 @@ class DressUpSubstate extends flixel.FlxSubState
     override function close()
     {
         FlxG.cameras.remove(camera);
+        if (flushOnExit)
+            Save.flush();
+        
         super.close();
     }
     
@@ -304,24 +317,48 @@ class DressUpSubstate extends flixel.FlxSubState
     {
         var prompt = new Prompt();
         add(prompt);
+        
+        showingPrompt = true;
+        function removePrompt()
+        {
+            showingPrompt = false;
+            remove(prompt);
+        }
+        
         var url = "https://www.newgrounds.com/portal/view/773236";
         prompt.setupYesNo
         ( 'Open Tankmas2020?\n${prettyUrl(url)}'
         ,   function onYes()
             {
                 FlxG.openURL(url);
-                prompt.setupTextOnly("Checking for Tankmas 2020 data, be sure to load the bedroom");
-                NGio.waitFor2020SaveData((outcome)->switch (outcome)
+                
+                var firstTimePlaying = Save.hasSave2020() == false;
+                if (firstTimePlaying)
+                    prompt.setupTextOnly("Checking for Tankmas 2020 data, be sure to load the bedroom");
+                else
+                    prompt.setupTextOnly("Checking for any new skins...");
+                
+                NGio.update2020SkinData((outcome)->switch (outcome)
                 {
                     case SUCCESS:
-                        Skins.checkUnlocks();
+                        var oldSkinsCount = Skins.numUnlocked;
+                        Skins.checkUnlocks(false);
                         resetSkinsList();
-                        prompt.setupOk("Load Successful, Enjoy!", remove.bind(prompt));
+                        if (firstTimePlaying)
+                            prompt.setupOk("Load Successful, Enjoy!", removePrompt);
+                        else
+                        {
+                            final newSkins = Skins.numUnlocked - oldSkinsCount;
+                            if (newSkins == 0)
+                                prompt.setupOk("No new skins unlocked.", removePrompt);
+                            else
+                                prompt.setupOk('$newSkins new skins unlocked!', removePrompt);
+                        }
                     case FAIL(error):
-                        prompt.setupOk("Could not find 2020 save data, please try again", remove.bind(prompt));
+                        prompt.setupOk("Could not find 2020 save data, please try again", removePrompt);
                 });
             }
-        , function onNo() remove(prompt)
+        , function onNo() removePrompt()
         );
     }
     
@@ -347,7 +384,7 @@ class SkinDisplay extends FlxSprite
         
         data.loadTo(this);
         unseen = new FlxSprite("assets/images/ui/new.png");
-        unseen.visible = data.unlocked && !Save.hasSeenskin(data.index);
+        unseen.visible = data.unlocked && !Save.hasSeenSkin(data.index);
     }
     
     override function draw()

@@ -7,6 +7,7 @@ import io.newgrounds.NG;
 import io.newgrounds.objects.Error;
 import io.newgrounds.objects.events.Outcome;
 import io.newgrounds.utils.MedalList;
+import io.newgrounds.utils.SaveSlotList;
 
 import utils.Log;
 import utils.BitArray;
@@ -27,6 +28,7 @@ class Save
     static var data:SaveData;
     static var data2020:SaveData2020;
     static var medals2020:ExternalMedalList;
+    static var dayMedalsUnlocked2020 = 0;
     static public var showName(get, set):Bool;
     
     static public function init(callback:(Outcome<String>)->Void)
@@ -147,6 +149,7 @@ class Save
                 case SUCCESS:
                     medalCallback(SUCCESS); 
                     medals2020 = advent2020.medals;
+                    count2020Medals(advent2020.medals);
                 case FAIL(error):
                     medalCallback(FAIL(error.toString()));
             }
@@ -171,23 +174,47 @@ class Save
         );
     }
     
-    @:allow(data.NGio)
-    static function load2020Save(callback:(Outcome<String>)->Void)
+    static function count2020Medals(medals:ExternalMedalList)
     {
-        NG.core.externalApps.add(APIStuff.APIID_2020).saveSlots[0].load
-        (
-            (o)->switch(o)
-            {
-                case SUCCESS(contents):
-                    data2020 = Json.parse(contents);
-                    callback(SUCCESS);
-                case FAIL(error):
-                    callback(FAIL(error));
-            }
+        for (medal in medals)
+        {
+            if (medal.unlocked)
+                dayMedalsUnlocked2020++;
+        }
+    }
+    
+    @:allow(data.NGio)
+    static function update2020SkinData(slot:ExternalSaveSlot, callback:(Outcome<String>)->Void)
+    {
+        OutcomeTools.chain(callback,
+            [ (c)->update2020Slot(slot, c)
+            , update2020Medals
+            ]
         );
     }
     
-    static function flush(?callback:(Outcome<Error>)->Void)
+    static function update2020Slot(slot:ExternalSaveSlot, callback:(Outcome<String>)->Void)
+    {
+        slot.load((o)->switch(o)
+        {
+            case SUCCESS(contents):
+                data2020 = Json.parse(contents);
+                callback(SUCCESS);
+            case FAIL(error):
+                callback(FAIL(error));
+        });
+    }
+    
+    static function update2020Medals(callback:(Outcome<String>)->Void)
+    {
+        medals2020.loadList((o)->switch(o)
+        {
+            case FAIL(error): callback(FAIL(error.toString()));
+            case SUCCESS    : callback(SUCCESS);
+        });
+    }
+    
+    static public function flush(?callback:(Outcome<Error>)->Void)
     {
         if (data != emptyData)
             NG.core.saveSlots[1].save(Json.stringify(data), callback);
@@ -272,18 +299,19 @@ class Save
         return data.days.countTrue();
     }
     
-    static public function skinSeen(index:Int)
+    static public function skinSeen(index:Int, flushNow = true)
     {
         #if !(UNLOCK_ALL_SKINS)
         if (data.skins[index] == false)
         {
             data.skins[index] = true;
-            flush();
+            if (flushNow)
+                flush();
         }
         #end
     }
     
-    static public function hasSeenskin(index:Int)
+    static public function hasSeenSkin(index:Int)
     {
         return data.skins[index];
     }
@@ -379,7 +407,7 @@ class Save
     
     /* --- --- --- --- 2020 --- --- --- --- */
     
-    static public function hasSave2020()
+    inline static public function hasSave2020()
     {
         return data2020 != null;
     }
@@ -392,10 +420,15 @@ class Save
         return medals2020[id].unlocked;
     }
     
+    inline static public function hasDayMedal2020(day:Int)
+    {
+        return hasMedal2020(NGio.DAY_MEDAL_0_2020 + day - 1);
+    }
+    
     static public function hasSeenDay2020(day:Int)
     {
         if (data2020 == null)
-            return false;
+            return hasDayMedal2020(day);
         // zero based
         return data2020.days[day - 1];
     }
@@ -403,7 +436,7 @@ class Save
     static public function countDaysSeen2020()
     {
         if (data2020 == null)
-            return 0;
+            return dayMedalsUnlocked2020;//TODO:
         
         return data2020.days.countTrue();
     }

@@ -399,7 +399,7 @@ class NGio
 	 * The user was directed to 2020, mid game, check to see if the data shows up.
 	 * @param callback called when it has successfully loaded medal data, or gave.
 	 */
-	static public function waitFor2020SaveData(callback:(Outcome<String>)->Void)
+	static public function update2020SkinData(callback:(Outcome<String>)->Void)
 	{
 		var slot = NG.core.externalApps[APIStuff.APIID_2020].saveSlots[1];
 		
@@ -417,7 +417,7 @@ class NGio
 			{
 				if (o.match(SUCCESS) && slot.isEmpty() == false)
 				{
-					Save.load2020Save(callback);
+					Save.update2020SkinData(slot, callback);
 					return;
 				}
 				else

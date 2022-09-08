@@ -15,6 +15,8 @@ using StringTools;
 
 class Skins
 {
+    static public var numUnlocked(default, null) = 0;
+    
     static var byIndex:Array<SkinData>;
     static var sorted:Array<SkinData>;
     static var skinOrder:Array<String> = [];
@@ -68,18 +70,22 @@ class Skins
     static public function checkUnlocks(showPopup = true)
     {
         var newUnlocks = 0;
+        numUnlocked = 0;
         
         for (data in byIndex)
         {
             if (!data.unlocked && (checkUser(data.users) || checkUnlockCondition(data.unlocksBy, data.year)))
             {
                 data.unlocked = true;
-                if (!Save.hasSeenskin(data.index))
+                if (!Save.hasSeenSkin(data.index))
                     newUnlocks++;
             }
             
-            if (!data.unlocked && Save.hasSeenskin(data.index))
+            if (data.unlocked)
+                numUnlocked++;
+            else if (Save.hasSeenSkin(data.index))
                 Log.save('skin ${data.id} is locked but was seen, unlocksBy:${data.unlocksBy}');
+            
         }
         
         sorted.sort(function (a, b)
