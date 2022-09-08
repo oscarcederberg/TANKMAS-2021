@@ -1,6 +1,6 @@
 package utils;
 
-import io.newgrounds.objects.events.ResultType;
+import io.newgrounds.objects.events.Outcome;
 
 class MultiCallback
 {
@@ -61,16 +61,16 @@ class MultiCallback
 
 class ResultMultiCallback<T>
 {
-    public var callback:(ResultType<T>)->Void;
+    public var callback:(Outcome<T>)->Void;
     public var logId:String = null;
     public var length(default, null) = 0;
     public var numRemaining(default, null) = 0;
     
-    var finalResult:ResultType<T> = SUCCESS;
-    var unfired = new Map<String, (ResultType<T>)->Void>();
+    var finalOutcome:Outcome<T> = SUCCESS;
+    var unfired = new Map<String, (Outcome<T>)->Void>();
     var fired = new Array<String>();
     
-    public function new (callback:(ResultType<T>)->Void, ?logId:String)
+    public function new (callback:(Outcome<T>)->Void, ?logId:String)
     {
         this.callback = callback;
         this.logId = logId;
@@ -81,8 +81,8 @@ class ResultMultiCallback<T>
         id = '$length:$id';
         length++;
         numRemaining++;
-        var func:(ResultType<T>)->Void = null;
-        func = function (result)
+        var func:(Outcome<T>)->Void = null;
+        func = function (outcome)
         {
             if (unfired.exists(id))
             {
@@ -90,10 +90,10 @@ class ResultMultiCallback<T>
                 fired.push(id);
                 numRemaining--;
                 
-                switch(result)
+                switch(outcome)
                 {
-                    case FAIL(error) if (finalResult.match(SUCCESS)):
-                        finalResult = result;
+                    case FAIL(error) if (finalOutcome.match(SUCCESS)):
+                        finalOutcome = outcome;
                     case _://nothing
                 }
                 
@@ -104,7 +104,7 @@ class ResultMultiCallback<T>
                 {
                     if (logId != null)
                         log('all callbacks fired');
-                    callback(finalResult);
+                    callback(finalOutcome);
                 }
             }
             else

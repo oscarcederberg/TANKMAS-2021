@@ -11,7 +11,7 @@ import io.newgrounds.objects.Score;
 import io.newgrounds.objects.ScoreBoard;
 import io.newgrounds.objects.events.Response;
 import io.newgrounds.objects.events.Result.GetDateTimeResult;
-import io.newgrounds.objects.events.ResultType;
+import io.newgrounds.objects.events.Outcome;
 
 import openfl.display.Stage;
 
@@ -68,9 +68,9 @@ class NGio
 		
 		ngDataLoaded.addOnce(callback);
 		
-		function checkSessionCallback(result:LoginResultType)
+		function checkSessionCallback(outcome:LoginOutcome)
 		{
-			switch(result)
+			switch(outcome)
 			{
 				case SUCCESS: // nothing
 				case FAIL(error):
@@ -138,7 +138,7 @@ class NGio
 			.send();
 	}
 	
-	static public function startManualSession(callback:(LoginResultType)->Void, passportHandler:((Bool)->Void)->Void):Void
+	static public function startManualSession(callback:(LoginOutcome)->Void, passportHandler:((Bool)->Void)->Void):Void
 	{
 		if (NG.core == null)
 			throw "call NGio.attemptLogin first";
@@ -183,9 +183,9 @@ class NGio
 	{
 		NG.core.requestServerTime
 		(
-			function(result)
+			function(outcome)
 			{
-				switch(result)
+				switch(outcome)
 				{
 					case SUCCESS(date) : ngDate = date;
 					case FAIL  (error): throw error.toString();
@@ -197,9 +197,9 @@ class NGio
 	}
 	
 	// --- SCOREBOARDS
-	static function onScoreboardsRequested(result:ResultType<Error>):Void
+	static function onScoreboardsRequested(outcome:Outcome<Error>):Void
 	{
-		switch(result)
+		switch(outcome)
 		{
 			case SUCCESS: // nothing
 			case FAIL(error):
@@ -289,9 +289,9 @@ class NGio
 	}
 	
 	// --- MEDALS
-	static function onMedalsRequested(result:ResultType<Error>):Void
+	static function onMedalsRequested(outcome:Outcome<Error>):Void
 	{
-		switch(result)
+		switch(outcome)
 		{
 			case SUCCESS: // nothing
 			case FAIL(error):
@@ -393,6 +393,48 @@ class NGio
 				)
 			.send();
 	}
+	
+	#if LOAD_2020_SKINS
+	/**
+	 * The user was directed to 2020, mid game, check to see if the data shows up.
+	 * @param callback called when it has successfully loaded medal data, or gave.
+	 */
+	static public function waitFor2020SaveData(callback:(Outcome<String>)->Void)
+	{
+		var slot = NG.core.externalApps[APIStuff.APIID_2020].saveSlots[1];
+		
+		final waitTime = 1.0;
+		
+		var checksLeft = 10;
+		inline function wait(callback)
+		{
+			new FlxTimer().start(waitTime, (_)->callback());
+		}
+		
+		function check()
+		{
+			slot.update((o)->
+			{
+				if (o.match(SUCCESS) && slot.isEmpty() == false)
+				{
+					Save.load2020Save(callback);
+					return;
+				}
+				else
+				{
+					checksLeft--;
+					if (checksLeft > 0)
+						wait(check);
+					else
+						callback(FAIL("timeout"));
+				}
+			});
+		}
+		
+		wait(check);
+	}
+	#end
+	
 	
 	static public function logEvent(event:NgEvent, once = false, ?pos:PosInfos)
 	{

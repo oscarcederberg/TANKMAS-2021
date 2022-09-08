@@ -22,7 +22,7 @@ import flixel.graphics.frames.FlxBitmapFont;
 import openfl.Assets;
 
 import io.newgrounds.NG;
-import io.newgrounds.objects.events.ResultType;
+import io.newgrounds.objects.events.Outcome;
 
 class BootState extends flixel.FlxState
 {
@@ -94,9 +94,9 @@ class BootState extends flixel.FlxState
         no.x -= no.width;
     }
     
-    function onManualConnectResult(result:LoginResultType):Void
+    function onManualConnectResult(outcome:LoginOutcome):Void
     {
-        switch(result)
+        switch(outcome)
         {
             case SUCCESS: onLogin();
             case FAIL(CANCELLED(_)): showMsgAndBegin("Login cancelled\nNot eligible for medals");
@@ -135,18 +135,15 @@ class BootState extends flixel.FlxState
         Calendar.init(callbacks.add("calendar"));
         
         final saveCallback = callbacks.add("save");
-        Save.init(function (result)
+        Save.init((outcome)->switch (outcome)
         {
-            switch (result)
-            {
-                case SUCCESS: saveCallback();
-                case FAIL(_):
-                    setCenteredNokiaMessage
-                        ( "There was an error loading cloud saves, please reload.\n"
-                        + "Sorry for the inconvenience"
-                        );
-                    setState(Error(true));
-            }
+            case SUCCESS: saveCallback();
+            case FAIL(_):
+                setCenteredNokiaMessage
+                    ( "There was an error loading cloud saves, please reload.\n"
+                    + "Sorry for the inconvenience"
+                    );
+                setState(Error(true));
         });
         
         var premierCallback = callbacks.add("moviePremier");

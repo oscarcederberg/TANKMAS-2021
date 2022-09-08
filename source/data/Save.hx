@@ -5,7 +5,7 @@ import states.rooms.RoomState;
 
 import io.newgrounds.NG;
 import io.newgrounds.objects.Error;
-import io.newgrounds.objects.events.ResultType;
+import io.newgrounds.objects.events.Outcome;
 import io.newgrounds.utils.MedalList;
 
 import utils.Log;
@@ -29,26 +29,19 @@ class Save
     static var medals2020:ExternalMedalList;
     static public var showName(get, set):Bool;
     
-    static public function init(callback:(ResultType<String>)->Void)
+    static public function init(callback:(Outcome<String>)->Void)
     {
         #if DISABLE_SAVE
-            data = emptyData;
+        data = emptyData;
         #else
-            NG.core.saveSlots.loadAllFiles
-            (
-                function (result)
-                {
-                    switch (result)
-                    {
-                        case SUCCESS: onCloudSavesLoaded(callback);
-                        case FAIL(error): callback(result);
-                    }
-                }
-            );
+        NG.core.saveSlots.loadAllFiles
+        (
+            (outcome)->outcome.splitHandlers((_)->onCloudSavesLoaded(callback), callback)
+        );
         #end
     }
     
-    static function onCloudSavesLoaded(callback:(ResultType<String>)->Void)
+    static function onCloudSavesLoaded(callback:(Outcome<String>)->Void)
     {
         #if CLEAR_SAVE
         createInitialData();
@@ -111,63 +104,60 @@ class Save
         var save = new FlxSave();
         if (save.bind("advent2021", "GeoKureli") && save.isEmpty() == false)
         {
-            for (field in Reflect.fields(save.data))
-                Reflect.setField(data, field, Reflect.field(save.data, field));
+            final localData:SaveData = save.data;
+            if (BitArray.isOldFormat(localData.presents))
+                localData.presents = BitArray.fromOldFormat(cast localData.presents);
+                
+            if (BitArray.isOldFormat(localData.days))
+                localData.days = BitArray.fromOldFormat(cast localData.days);
+            
+            if (BitArray.isOldFormat(localData.skins))
+                localData.skins = BitArray.fromOldFormat(cast localData.skins);
+            
+            if (BitArray.isOldFormat(localData.seenInstruments))
+                localData.seenInstruments = BitArray.fromOldFormat(cast localData.seenInstruments);
+            
+            if (localData.instrument < -1 && localData.seenInstruments.countTrue() > 0)
+            {
+                // fix an old glitch where i deleted instrument save
+                var i = 0;
+                while (!localData.seenInstruments[i] && i < 32)
+                    i++;
+                
+                localData.instrument = i;
+            }
+            
+            // merge save data
+            for (field in Reflect.fields(localData))
+                Reflect.setField(data, field, Reflect.field(localData, field));
             
             save.erase();
         }
     }
     
-    static function parseLocalSave(data:SaveData)
-    {
-        if (BitArray.isOldFormat(data.presents))
-            data.presents = BitArray.fromOldFormat(cast data.presents);
-            
-        if (BitArray.isOldFormat(data.days))
-            data.days = BitArray.fromOldFormat(cast data.days);
-        
-        if (BitArray.isOldFormat(data.skins))
-            data.skins = BitArray.fromOldFormat(cast data.skins);
-        
-        if (BitArray.isOldFormat(data.seenInstruments))
-            data.seenInstruments = BitArray.fromOldFormat(cast data.seenInstruments);
-        
-        if (data.instrument < -1 && data.seenInstruments.countTrue() > 0)
-        {
-            // fix an old glitch where i deleted instrument save
-            var i = 0;
-            while (!data.seenInstruments[i] && i < 32)
-                i++;
-            
-            data.instrument = i;
-        }
-    }
-    
-   static function load2020Data(callback:(ResultType<String>)->Void)
+   static function load2020Data(callback:(Outcome<String>)->Void)
     {
         var callbacks = new ResultMultiCallback<String>(callback, "2020data");
         
         var advent2020 = NG.core.externalApps.add(APIStuff.APIID_2020);
         var medalCallback = callbacks.add("medals");
-        advent2020.medals.loadList((result)->
+        advent2020.medals.loadList(
+            (outcome)->switch (outcome)
             {
-                switch (result)
-                {
-                    case SUCCESS:
-                        medalCallback(SUCCESS); 
-                        medals2020 = advent2020.medals;
-                    case FAIL(error):
-                        medalCallback(FAIL(error.toString()));
-                }
+                case SUCCESS:
+                    medalCallback(SUCCESS); 
+                    medals2020 = advent2020.medals;
+                case FAIL(error):
+                    medalCallback(FAIL(error.toString()));
             }
         );
         
         var saveCallback = callbacks.add("saves");
         advent2020.saveSlots.loadAllFiles
         (
-            function (result)
+            function (outcome)
             {
-                switch (result)
+                switch (outcome)
                 {
                     case FAIL(_):
                     case SUCCESS:
@@ -176,12 +166,28 @@ class Save
                             data2020 = Json.parse(slot.contents);
                 }
                 
-                saveCallback(result);
+                saveCallback(outcome);
             }
         );
     }
     
-    static function flush(?callback:(ResultType<Error>)->Void)
+    @:allow(data.NGio)
+    static function load2020Save(callback:(Outcome<String>)->Void)
+    {
+        NG.core.externalApps.add(APIStuff.APIID_2020).saveSlots[0].load
+        (
+            (o)->switch(o)
+            {
+                case SUCCESS(contents):
+                    data2020 = Json.parse(contents);
+                    callback(SUCCESS);
+                case FAIL(error):
+                    callback(FAIL(error));
+            }
+        );
+    }
+    
+    static function flush(?callback:(Outcome<Error>)->Void)
     {
         if (data != emptyData)
             NG.core.saveSlots[1].save(Json.stringify(data), callback);
