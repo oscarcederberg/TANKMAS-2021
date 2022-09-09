@@ -70,7 +70,7 @@ class MedalPopup extends flixel.group.FlxSpriteGroup
             if (NG.core.medals.state == Loaded)
                 medalsLoaded();
             else
-                NG.core.medals.onLoaded.add(medalsLoaded);
+                NG.core.medals.onLoad.add(medalsLoaded);
         }
     }
     

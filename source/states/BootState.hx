@@ -151,7 +151,7 @@ class BootState extends flixel.FlxState
         
         NGio.updateServerVersion(callbacks.add("server version"));
         if (NG.core.loggedIn && NG.core.medals == null)
-            NG.core.medals.onLoaded.addOnce(callbacks.add("medal list"));
+            NG.core.medals.onLoad.addOnce(callbacks.add("medal list"));
         
         callbacksSet();
     }
