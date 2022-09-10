@@ -59,7 +59,7 @@ class MultiCallback
     public function getUnfired() return [for (id in unfired) id];
 }
 
-class ResultMultiCallback<T>
+class OutcomeMultiCallback<T>
 {
     public var callback:(Outcome<T>)->Void;
     public var logId:String = null;

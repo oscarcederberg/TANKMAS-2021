@@ -2,6 +2,7 @@ package data;
 
 import utils.BitArray;
 
+import io.newgrounds.Call;
 import io.newgrounds.NG;
 import io.newgrounds.NGLite;
 import io.newgrounds.components.ScoreBoardComponent.Period;
@@ -10,7 +11,7 @@ import io.newgrounds.objects.Medal;
 import io.newgrounds.objects.Score;
 import io.newgrounds.objects.ScoreBoard;
 import io.newgrounds.objects.events.Response;
-import io.newgrounds.objects.events.Result.GetDateTimeResult;
+import io.newgrounds.objects.events.Result;
 import io.newgrounds.objects.events.Outcome;
 
 import openfl.display.Stage;
@@ -113,28 +114,27 @@ class NGio
 	{
 		clientVersion = lime.app.Application.current.meta.get('version');
 		NG.core.calls.app.getCurrentVersion(clientVersion)
-			.addDataHandler
-				(	function (response)
-					{
-						if (response.success && response.result.success)
-						{
-							serverVersion = response.result.data.currentVersion;
-							var server = serverVersion.split(".").map(Std.parseInt);
-							var client = clientVersion.split(".").map(Std.parseInt);
-							validMajorVersion = server.shift() <= client.shift();
-							validMinorVersion = server.shift() <= client.shift() && validMajorVersion;
-							validVersion = server.shift() <= client.shift() && validMinorVersion;
-						}
-						else
-						{
-							serverVersion = null;
-							validMajorVersion = false;
-							validMinorVersion = false;
-							validVersion = false;
-						}
-						callback();
-					}
-				)
+			.addOutcomeHandler((outcome)->switch (outcome)
+			{
+				case SUCCESS(data):
+				{
+					serverVersion = data.currentVersion;
+					var server = serverVersion.split(".").map(Std.parseInt);
+					var client = clientVersion.split(".").map(Std.parseInt);
+					validMajorVersion = server.shift() <= client.shift();
+					validMinorVersion = server.shift() <= client.shift() && validMajorVersion;
+					validVersion = server.shift() <= client.shift() && validMinorVersion;
+					callback();
+				}
+				case FAIL(_):
+				{
+					serverVersion = null;
+					validMajorVersion = false;
+					validMinorVersion = false;
+					validVersion = false;
+					callback();
+				}
+			})
 			.send();
 	}
 	
@@ -169,7 +169,6 @@ class NGio
 		
 		NG.core.medals.loadList(onMedalsRequested);
 		
-		
 		#if debug
 		isContributor = true;
 		#else
@@ -197,7 +196,7 @@ class NGio
 	}
 	
 	// --- SCOREBOARDS
-	static function onScoreboardsRequested(outcome:Outcome<Error>):Void
+	static function onScoreboardsRequested(outcome:Outcome<CallError>):Void
 	{
 		switch(outcome)
 		{
@@ -289,7 +288,7 @@ class NGio
 	}
 	
 	// --- MEDALS
-	static function onMedalsRequested(outcome:Outcome<Error>):Void
+	static function onMedalsRequested(outcome:Outcome<CallError>):Void
 	{
 		switch(outcome)
 		{
@@ -378,17 +377,15 @@ class NGio
 	static public function checkForMoviePremier(callback:(Null<String>)->Void)
 	{
 		NG.core.calls.loader.loadAuthorUrl()
-			.addDataHandler
-				(	(response)->
+			.addOutcomeHandler
+				(	(outcome)->switch(outcome)
 					{
-						if (response.success && response.result.success)
-						{
-							var url:String = (response.result.data:Dynamic).url;
-							if (url.indexOf(".mp4?") != -1)
-								moviePremier = url;
-						}
-						
-						callback(moviePremier);
+						case FAIL(_):callback(moviePremier);
+						case SUCCESS(data):
+							if (data.url.indexOf(".mp4?") != -1)
+								moviePremier = data.url;
+							
+							callback(moviePremier);
 					}
 				)
 			.send();

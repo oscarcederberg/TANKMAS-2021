@@ -100,7 +100,7 @@ class BootState extends flixel.FlxState
         {
             case SUCCESS: onLogin();
             case FAIL(CANCELLED(_)): showMsgAndBegin("Login cancelled\nNot eligible for medals");
-            case FAIL(ERROR(error)): showMsgAndBegin(error);
+            case FAIL(ERROR(error)): showMsgAndBegin(error.toString());
         }
     }
     

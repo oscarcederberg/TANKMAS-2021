@@ -3,6 +3,7 @@ package data;
 import data.Content;
 import states.rooms.RoomState;
 
+import io.newgrounds.Call;
 import io.newgrounds.NG;
 import io.newgrounds.objects.Error;
 import io.newgrounds.objects.events.Outcome;
@@ -31,7 +32,7 @@ class Save
     static var dayMedalsUnlocked2020 = 0;
     static public var showName(get, set):Bool;
     
-    static public function init(callback:(Outcome<String>)->Void)
+    static public function init(callback:(Outcome<CallError>)->Void)
     {
         #if DISABLE_SAVE
         data = emptyData;
@@ -43,7 +44,7 @@ class Save
         #end
     }
     
-    static function onCloudSavesLoaded(callback:(Outcome<String>)->Void)
+    static function onCloudSavesLoaded(callback:(Outcome<CallError>)->Void)
     {
         #if CLEAR_SAVE
         createInitialData();
@@ -137,9 +138,9 @@ class Save
         }
     }
     
-   static function load2020Data(callback:(Outcome<String>)->Void)
+   static function load2020Data(callback:(Outcome<CallError>)->Void)
     {
-        var callbacks = new ResultMultiCallback<String>(callback, "2020data");
+        var callbacks = new OutcomeMultiCallback<CallError>(callback, "2020data");
         
         var advent2020 = NG.core.externalApps.add(APIStuff.APIID_2020);
         var medalCallback = callbacks.add("medals");
@@ -151,7 +152,7 @@ class Save
                     medals2020 = advent2020.medals;
                     count2020Medals(advent2020.medals);
                 case FAIL(error):
-                    medalCallback(FAIL(error.toString()));
+                    medalCallback(FAIL(error));
             }
         );
         
@@ -186,14 +187,14 @@ class Save
     @:allow(data.NGio)
     static function update2020SkinData(slot:ExternalSaveSlot, callback:(Outcome<String>)->Void)
     {
-        OutcomeTools.chain(callback,
+        OutcomeTools.chain((o)->callback(o.errorToString()),
             [ (c)->update2020Slot(slot, c)
             , update2020Medals
             ]
         );
     }
     
-    static function update2020Slot(slot:ExternalSaveSlot, callback:(Outcome<String>)->Void)
+    static function update2020Slot(slot:ExternalSaveSlot, callback:(Outcome<CallError>)->Void)
     {
         slot.load((o)->switch(o)
         {
@@ -205,16 +206,16 @@ class Save
         });
     }
     
-    static function update2020Medals(callback:(Outcome<String>)->Void)
+    static function update2020Medals(callback:(Outcome<CallError>)->Void)
     {
         medals2020.loadList((o)->switch(o)
         {
-            case FAIL(error): callback(FAIL(error.toString()));
+            case FAIL(error): callback(FAIL(error));
             case SUCCESS    : callback(SUCCESS);
         });
     }
     
-    static public function flush(?callback:(Outcome<Error>)->Void)
+    static public function flush(?callback:(Outcome<CallError>)->Void)
     {
         if (data != emptyData)
             NG.core.saveSlots[1].save(Json.stringify(data), callback);
