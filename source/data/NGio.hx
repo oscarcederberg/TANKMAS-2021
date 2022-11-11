@@ -119,11 +119,17 @@ class NGio
 				case SUCCESS(data):
 				{
 					serverVersion = data.currentVersion;
-					var server = serverVersion.split(".").map(Std.parseInt);
-					var client = clientVersion.split(".").map(Std.parseInt);
-					validMajorVersion = server.shift() <= client.shift();
-					validMinorVersion = server.shift() <= client.shift() && validMajorVersion;
-					validVersion = server.shift() <= client.shift() && validMinorVersion;
+					var serverArr = serverVersion.split(".").map(Std.parseInt);
+					var clientArr = clientVersion.split(".").map(Std.parseInt);
+					var server = serverArr.shift();
+					var client = clientArr.shift();
+					validMajorVersion = server <= client;
+					var server = (server << 8) | serverArr.shift();
+					var client = (client << 8) | clientArr.shift();
+					validMinorVersion = server <= client;
+					var server = (server << 8) | serverArr.shift();
+					var client = (client << 8) | clientArr.shift();
+					validVersion = server <= client;
 					callback();
 				}
 				case FAIL(_):
@@ -369,7 +375,11 @@ class NGio
 	static public function hasMedalByName(name:String):Bool
 	{
 		if (!Content.medals.exists(name))
+		#if noContent
+			return false;
+		#else
 			throw 'invalid name:%name';
+		#end
 		
 		return hasMedal(Content.medals[name]);
 	}

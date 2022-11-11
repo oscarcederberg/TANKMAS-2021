@@ -35,12 +35,22 @@ class Save
     static public function init(callback:(Outcome<CallError>)->Void)
     {
         #if DISABLE_SAVE
-        data = emptyData;
+        createInitialData(emptyData);
+        callback(SUCCESS);
         #else
-        NG.core.saveSlots.loadAllFiles
-        (
-            (outcome)->outcome.splitHandlers((_)->onCloudSavesLoaded(callback), callback)
-        );
+        if (NGio.isLoggedIn)
+        {
+            
+            NG.core.saveSlots.loadAllFiles
+            (
+                (outcome)->outcome.splitHandlers((_)->onCloudSavesLoaded(callback), callback)
+            );
+        }
+        else
+        {
+            createInitialData(emptyData);
+            callback(SUCCESS);
+        }
         #end
     }
     
@@ -88,9 +98,11 @@ class Save
         #end
     }
     
-    static function createInitialData()
+    static function createInitialData(?data:SaveData)
     {
-        data = cast {};
+        if (data == null)
+            data = cast {};
+        
         data.presents        = new BitArray();
         data.days            = new BitArray();
         data.skins           = new BitArray();
@@ -100,6 +112,7 @@ class Save
         data.showName        = false;
         data.seenYeti        = false;
         data.cafeOrder       = null;
+        Save.data = data;
     }
     
     static function mergeLocalSave()
@@ -359,7 +372,7 @@ class Save
     
     static public function getInstrument()
     {
-        if (data.instrument < 0) return null;
+        if (data.instrument < 0 || Content.hasInstrumentData == false) return null;
         return Content.instrumentsByIndex[data.instrument].id;
     }
     

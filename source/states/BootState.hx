@@ -66,7 +66,7 @@ class BootState extends flixel.FlxState
     {
         timeout.cancel();
         #if NG_BYPASS_LOGIN
-        showMsgAndBegin("Login bypassed\nNot eligible for medals");
+        showMsgAndBegin("Login bypassed\nNot eligible for medals or cloud saves");
         #else
         if (NGio.isLoggedIn)
             onLogin();
@@ -99,7 +99,7 @@ class BootState extends flixel.FlxState
         switch(outcome)
         {
             case SUCCESS: onLogin();
-            case FAIL(CANCELLED(_)): showMsgAndBegin("Login cancelled\nNot eligible for medals");
+            case FAIL(CANCELLED(_)): showMsgAndBegin("Login cancelled\nNot eligible for medals or cloud saves");
             case FAIL(ERROR(error)): showMsgAndBegin(error.toString());
         }
     }
@@ -258,7 +258,8 @@ class BootState extends flixel.FlxState
                             msg.text += "\nYou are only seeing this message because you are in the credits";
                             
                             // change text when it's loaded
-                            startRefreshChecks(()->setCenteredNokiaMessage("IT'S UP, REFRESH THE PAGE! GO GO GO GO!1"));
+                            if (blockingList.length > 0)
+                                startRefreshChecks(()->setCenteredNokiaMessage("IT'S UP, REFRESH THE PAGE! GO GO GO GO!1"));
                             
                             setState(Error(false));
                         }
