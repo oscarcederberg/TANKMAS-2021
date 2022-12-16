@@ -197,7 +197,7 @@ class NGio
 				}
 				onComplete();
 			}
-		, false // useLocalTime
+		, true // useServerTime
 		);
 	}
 	
@@ -316,7 +316,7 @@ class NGio
 			else if(dayMedal >= 1 && dayMedal <= 32)
 			{
 				logVerbose("seen day:" + dayMedal);
-				Save.daySeen(dayMedal);
+				// Save.daySeen(dayMedal);
 			}
 			
 			numMedals++;

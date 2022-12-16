@@ -61,21 +61,25 @@ class Calendar
             return;
         }
         
-        trace("month:" + date.getMonth(), "day:" + date.getDate());
+        trace("server time:" + date.toString());
         isAdvent = date.getMonth() == 11 || (date.getMonth() == 0 && date.getDate() == 1);
         isChristmas = date.getMonth() == 11 && date.getDate() == 25;
         
         if (isAdvent)// && date.getFullYear() == 2019)
         {
             day = date.getDate() + (date.getMonth() == 11 ? 0 : 31);
-            #if FORGET_TODAY
-            Save.debugForgetDay(day);
-            #end
-            isUnseenDay = !Save.hasSeenDay(day);
-            Save.daySeen(day);
         }
         
         callback();
+    }
+    
+    static public function onGameInit()
+    {
+        #if FORGET_TODAY
+        Save.debugForgetDay(day);
+        #end
+        isUnseenDay = !Save.hasSeenDay(day);
+        Save.daySeen(day);
     }
     
     @:allow(states.BootState)

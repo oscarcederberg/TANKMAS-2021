@@ -116,6 +116,8 @@ class BootState extends flixel.FlxState
         var callbacks = new MultiCallback(
             function ()
             {
+                Calendar.onGameInit();
+                
                 setState(Waiting);
                 #if ALLOW_DAY_SKIP
                 if (Calendar.canSkip()
